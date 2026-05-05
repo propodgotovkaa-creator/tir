@@ -159,58 +159,18 @@ html, body {
 .gun {
   position: absolute;
   left: 50%;
-  bottom: -8px;
-  width: 240px;
-  height: 155px;
-  transform: translateX(-50%);
+  bottom: -18px;
+  width: 330px;
   z-index: 40;
+  transform: translateX(-50%);
   pointer-events: none;
-  filter: drop-shadow(0 14px 16px rgba(0,0,0,0.45));
+  filter: drop-shadow(0 14px 18px rgba(0,0,0,0.45));
 }
 
-.gun-barrel {
-  position: absolute;
-  left: 92px;
-  top: 34px;
-  width: 120px;
-  height: 32px;
-  border-radius: 16px 22px 22px 16px;
-  background: linear-gradient(180deg, #d9e1ea, #5f6f82 45%, #2d3847);
-  box-shadow: inset 0 5px 8px rgba(255,255,255,0.45), inset 0 -7px 10px rgba(0,0,0,0.35);
-}
-
-.gun-body {
-  position: absolute;
-  left: 54px;
-  top: 52px;
-  width: 116px;
-  height: 58px;
-  border-radius: 16px 20px 14px 16px;
-  background: linear-gradient(145deg, #7b8da3, #263446);
-  box-shadow: inset 0 6px 10px rgba(255,255,255,0.32), inset 0 -8px 12px rgba(0,0,0,0.38);
-}
-
-.gun-handle {
-  position: absolute;
-  left: 76px;
-  top: 98px;
-  width: 54px;
-  height: 78px;
-  border-radius: 12px 12px 22px 22px;
-  background: linear-gradient(145deg, #3a4555, #111823);
-  transform: rotate(14deg);
-  box-shadow: inset 0 5px 8px rgba(255,255,255,0.15), inset 0 -8px 10px rgba(0,0,0,0.4);
-}
-
-.gun-trigger {
-  position: absolute;
-  left: 128px;
-  top: 98px;
-  width: 34px;
-  height: 38px;
-  border: 5px solid #1b2431;
-  border-radius: 50%;
-  background: transparent;
+.gun img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .aim {
@@ -371,10 +331,7 @@ button {
   <div class="aim-line" id="aimLine"></div>
 
   <div class="gun">
-    <div class="gun-barrel"></div>
-    <div class="gun-body"></div>
-    <div class="gun-handle"></div>
-    <div class="gun-trigger"></div>
+    <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png" alt="Пистолет">
   </div>
 
   <div class="aim" id="aim">

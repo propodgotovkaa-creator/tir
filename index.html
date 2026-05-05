@@ -162,8 +162,8 @@ html, body {
   bottom: -18px;
   width: 330px;
   z-index: 40;
-  transform: translateX(-50%);
   pointer-events: none;
+  transform-origin: 50% 90%;
   filter: drop-shadow(0 14px 18px rgba(0,0,0,0.45));
 }
 
@@ -330,7 +330,7 @@ button {
 
   <div class="aim-line" id="aimLine"></div>
 
-  <div class="gun">
+  <div class="gun" id="gun">
     <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png" alt="Пистолет">
   </div>
 
@@ -356,6 +356,12 @@ const GAME_CONFIG = {
 
   balloonFlyTime: 900,
   balloonStopY: 39,
+
+  aimPaddingX: 120,
+  aimTopLimit: 130,
+  aimBottomLimit: 520,
+
+  gunMaxRotate: 24,
 
   showFeedback: true,
   backgroundImage: "",
@@ -418,10 +424,14 @@ const prize = document.getElementById("prize");
 const restartBtn = document.getElementById("restartBtn");
 const aim = document.getElementById("aim");
 const aimLine = document.getElementById("aimLine");
+const gun = document.getElementById("gun");
 
 let currentRound = 0;
 let lives = GAME_CONFIG.livesTotal;
 let locked = false;
+
+let aimX = window.innerWidth / 2;
+let aimY = window.innerHeight / 2;
 
 function init() {
   currentRound = 0;
@@ -439,6 +449,7 @@ function init() {
 
   renderLives();
   startRound();
+  updateAim(aimX, aimY);
 }
 
 function renderLives() {
@@ -488,7 +499,7 @@ function createBalloons(task) {
 
     balloon.addEventListener("click", (e) => {
       e.stopPropagation();
-      shoot(balloon, word, task.correctWord, e.clientX, e.clientY);
+      shoot(balloon, word, task.correctWord, aimX, aimY);
     });
 
     balloonsBox.appendChild(balloon);
@@ -580,15 +591,28 @@ function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
 
-document.addEventListener("mousemove", (e) => {
-  aim.style.left = e.clientX + "px";
-  aim.style.top = e.clientY + "px";
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function updateAim(rawX, rawY) {
+  const minX = GAME_CONFIG.aimPaddingX;
+  const maxX = window.innerWidth - GAME_CONFIG.aimPaddingX;
+
+  const minY = GAME_CONFIG.aimTopLimit;
+  const maxY = Math.min(window.innerHeight - 180, GAME_CONFIG.aimBottomLimit);
+
+  aimX = clamp(rawX, minX, maxX);
+  aimY = clamp(rawY, minY, maxY);
+
+  aim.style.left = aimX + "px";
+  aim.style.top = aimY + "px";
 
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight - 52;
 
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
+  const dx = aimX - startX;
+  const dy = aimY - startY;
 
   const length = Math.sqrt(dx * dx + dy * dy);
   const angle = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -597,6 +621,21 @@ document.addEventListener("mousemove", (e) => {
   aimLine.style.top = startY + "px";
   aimLine.style.width = length + "px";
   aimLine.style.transform = `rotate(${angle}deg)`;
+
+  const gunAngle = clamp((aimX - startX) / (window.innerWidth / 2) * GAME_CONFIG.gunMaxRotate, -GAME_CONFIG.gunMaxRotate, GAME_CONFIG.gunMaxRotate);
+  gun.style.transform = `translateX(-50%) rotate(${gunAngle}deg)`;
+}
+
+document.addEventListener("mousemove", (e) => {
+  updateAim(e.clientX, e.clientY);
+});
+
+document.addEventListener("click", () => {
+  createShotFlash(aimX, aimY);
+});
+
+window.addEventListener("resize", () => {
+  updateAim(aimX, aimY);
 });
 
 restartBtn.addEventListener("click", init);

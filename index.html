@@ -13,7 +13,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #0d1238;
 }
 
@@ -21,9 +21,7 @@ html, body {
   position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   cursor: none;
-  background: #0d1238;
 }
 
 .bg {
@@ -31,8 +29,6 @@ html, body {
   inset: 0;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
 }
 
 .task-panel {
@@ -40,116 +36,57 @@ html, body {
   top: 18px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20;
+  z-index: 10;
+  background: #fff;
+  padding: 10px 18px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 22px;
-  border-radius: 24px;
-  background: rgba(255,255,255,0.94);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+  gap: 10px;
 }
 
-.task-panel span {
-  font-size: 24px;
-  font-weight: 900;
-  color: #30245f;
-}
-
-.task-img {
-  width: 86px;
-  height: 86px;
-  object-fit: contain;
-}
+.task-img { width: 70px; }
 
 .lives {
   position: absolute;
-  top: 22px;
-  left: 22px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.heart {
-  font-size: 34px;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
-}
-
-.heart.broken {
-  opacity: 0.35;
-  transform: rotate(-10deg) scale(0.9);
+  top: 20px;
+  left: 20px;
 }
 
 .progress {
   position: absolute;
-  top: 22px;
-  right: 22px;
-  z-index: 20;
-  padding: 10px 16px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.94);
-  color: #30245f;
-  font-size: 22px;
-  font-weight: 900;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.26);
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 12px;
 }
 
 .balloon {
   position: absolute;
-  width: 190px;
-  height: 230px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: flyUp 0.9s ease-out forwards;
-  z-index: 8;
-}
-
-.balloon-body {
-  width: 170px;
-  height: 190px;
-  background: radial-gradient(circle at 35% 25%, #fff7a8 0%, #ffcc4d 28%, #ff7b3d 78%);
-  border-radius: 52% 52% 48% 48%;
-  box-shadow:
-    inset -18px -20px 28px rgba(0,0,0,0.16),
-    inset 12px 12px 18px rgba(255,255,255,0.55),
-    0 14px 28px rgba(0,0,0,0.28);
-  padding: 24px;
-  font-size: 28px;
-  font-weight: 900;
-  color: #2b235b;
+  width: 180px;
+  height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  line-height: 1.1;
+  animation: flyUp 0.7s ease-out forwards;
 }
 
-.balloon::after {
-  content: "";
+.balloon img {
+  width: 100%;
+}
+
+.word {
   position: absolute;
-  bottom: 4px;
-  width: 3px;
-  height: 48px;
-  background: rgba(255,255,255,0.8);
-}
-
-.balloon.pop {
-  animation: pop 0.35s ease-out forwards;
-  pointer-events: none;
+  font-weight: 900;
+  font-size: 22px;
+  color: #2b235b;
+  text-align: center;
 }
 
 @keyframes flyUp {
-  from { transform: translateY(45vh) scale(0.85); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-@keyframes pop {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.22); opacity: 0.8; }
-  100% { transform: scale(0); opacity: 0; }
+  from { transform: translateY(300px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .gun {
@@ -157,402 +94,152 @@ html, body {
   left: 50%;
   bottom: -18px;
   width: 330px;
-  z-index: 40;
-  pointer-events: none;
-  transform-origin: 50% 90%;
-  filter: drop-shadow(0 14px 18px rgba(0,0,0,0.45));
+  transform: translateX(-50%);
 }
 
-.gun img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
+.gun img { width: 100%; }
 
 .aim {
   position: absolute;
-  width: 62px;
-  height: 62px;
-  border: 3px solid rgba(255,255,255,0.95);
+  width: 60px;
+  height: 60px;
+  border: 3px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 50;
-  box-shadow:
-    0 0 8px rgba(255,255,255,0.9),
-    0 0 20px rgba(79,214,255,0.75),
-    inset 0 0 12px rgba(79,214,255,0.45);
-}
-
-.aim::before,
-.aim::after {
-  content: "";
-  position: absolute;
-  background: rgba(255,255,255,0.95);
-  box-shadow: 0 0 8px rgba(79,214,255,0.9);
-}
-
-.aim::before {
-  width: 82px;
-  height: 2px;
-  left: -13px;
-  top: 50%;
-}
-
-.aim::after {
-  width: 2px;
-  height: 82px;
-  left: 50%;
-  top: -13px;
-}
-
-.aim-dot {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  background: #ff4747;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px #ff4747;
 }
 
 .aim-line {
   position: absolute;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(79,214,255,0.05), rgba(79,214,255,0.75));
-  transform-origin: left center;
-  pointer-events: none;
-  opacity: 0.65;
-  z-index: 35;
-  box-shadow: 0 0 12px rgba(79,214,255,0.6);
-}
-
-.shot-flash {
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, #ffe66d 40%, transparent 75%);
-  animation: flash 0.18s ease-out forwards;
-  pointer-events: none;
-  z-index: 55;
-}
-
-@keyframes flash {
-  from { transform: scale(0.5); opacity: 1; }
-  to { transform: scale(2.4); opacity: 0; }
-}
-
-.cross {
-  position: absolute;
-  z-index: 70;
-  font-size: 72px;
-  color: #ff3030;
-  text-shadow: 0 4px 16px rgba(0,0,0,0.45);
-  pointer-events: none;
-  animation: crossAnim 0.65s ease-out forwards;
-}
-
-@keyframes crossAnim {
-  from { transform: scale(0.4); opacity: 0; }
-  40% { transform: scale(1.15); opacity: 1; }
-  to { transform: scale(1); opacity: 0; }
+  height: 2px;
+  background: white;
+  transform-origin: left;
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  z-index: 100;
   display: none;
-  align-items: center;
   justify-content: center;
-  background: rgba(8, 7, 30, 0.78);
-  text-align: center;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
 }
 
 .modal {
-  width: min(560px, 90%);
-  padding: 34px;
-  border-radius: 32px;
-  background: rgba(255,255,255,0.96);
-  color: #30245f;
-}
-
-.prize { font-size: 88px; margin-bottom: 10px; }
-
-button {
-  border: 0;
-  border-radius: 18px;
-  padding: 14px 24px;
-  font-size: 22px;
-  font-weight: 900;
-  color: white;
-  background: linear-gradient(135deg, #7d5cff, #ff64c8);
-  cursor: pointer;
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
 }
 </style>
 </head>
 
 <body>
-<div id="game">
-  <div class="bg" id="bg"></div>
 
-  <div class="lives" id="lives"></div>
-  <div class="progress" id="progress">1 / 8</div>
+<div id="game">
+
+  <div class="bg" id="bg"></div>
 
   <div class="task-panel">
     <span>Найди:</span>
-    <img id="taskImg" class="task-img" alt="">
+    <img id="taskImg" class="task-img">
   </div>
 
+  <div class="lives" id="lives"></div>
+  <div class="progress" id="progress"></div>
+
   <div id="balloons"></div>
+
   <div class="aim-line" id="aimLine"></div>
 
   <div class="gun" id="gun">
-    <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png" alt="Пистолет">
+    <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png">
   </div>
 
-  <div class="aim" id="aim"><div class="aim-dot"></div></div>
+  <div class="aim" id="aim"></div>
 
   <div class="overlay" id="overlay">
     <div class="modal">
-      <div class="prize" id="prize">🧸</div>
-      <h2 id="finalTitle">Молодец!</h2>
-      <p id="finalText">Забери свою игрушку!</p>
-      <button id="restartBtn">Играть снова</button>
+      <h2 id="finalText"></h2>
+      <button onclick="init()">Играть снова</button>
     </div>
   </div>
+
 </div>
 
 <script>
-const GAME_CONFIG = {
-  roundsTotal: 8,
-  livesTotal: 3,
-  balloonsCount: 3,
-  balloonFlyTime: 900,
-  balloonStopY: 39,
-  aimPaddingX: 120,
-  aimTopLimit: 130,
-  aimBottomLimit: 520,
-  gunMaxRotate: 24,
-  showFeedback: true,
 
-  backgroundImage: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/60fe98cf0899a039719a76c82b8cdf4f39200511/image.png",
+const CONFIG = {
+  balloonY: 32, // ВЫШЕ ПИСТОЛЕТА
 
-  prizeEmoji: "🧸",
-
-  tasks: [
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🐶", correctWord: "собака", words: ["медуза", "собака", "сумка"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🦉", correctWord: "сова", words: ["сова", "сыр", "сок"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=✈️", correctWord: "самолёт", words: ["самолёт", "санки", "сундук"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧀", correctWord: "сыр", words: ["сумка", "сыр", "самокат"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧃", correctWord: "сок", words: ["сок", "соты", "сапоги"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🛷", correctWord: "санки", words: ["сова", "санки", "сумка"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=👜", correctWord: "сумка", words: ["сыр", "сумка", "сок"] },
-    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧰", correctWord: "сундук", words: ["самокат", "сундук", "сова"] }
+  balloons: [
+    {
+      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/83ef03cf4fc77b38e378a95c7f9c2079a93ea6d1/left.png",
+      pop: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/pop.png"
+    },
+    {
+      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/36415665c0e2cbacb29068ef2a8c9e54c5ba24d1/center.png",
+      pop: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/4158021f97731c2001fee8056568ba917a9090fc/pop.png"
+    },
+    {
+      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/c9a2b0ea64213d610aa22eb2e266888a524781bf/right.png",
+      pop: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/88e3741bb8759326e3f0e75e4f07b4f297a8a6a2/pop.png"
+    }
   ]
 };
 
-const game = document.getElementById("game");
-const bg = document.getElementById("bg");
-const taskImg = document.getElementById("taskImg");
-const balloonsBox = document.getElementById("balloons");
-const livesBox = document.getElementById("lives");
-const progressBox = document.getElementById("progress");
-const overlay = document.getElementById("overlay");
-const finalTitle = document.getElementById("finalTitle");
-const finalText = document.getElementById("finalText");
-const prize = document.getElementById("prize");
-const restartBtn = document.getElementById("restartBtn");
-const aim = document.getElementById("aim");
-const aimLine = document.getElementById("aimLine");
-const gun = document.getElementById("gun");
+let round = 0;
+let lives = 3;
 
-let currentRound = 0;
-let lives = GAME_CONFIG.livesTotal;
-let locked = false;
-let aimX = window.innerWidth / 2;
-let aimY = window.innerHeight / 2;
-
-function init() {
-  currentRound = 0;
-  lives = GAME_CONFIG.livesTotal;
-  locked = false;
-  overlay.style.display = "none";
-  prize.textContent = GAME_CONFIG.prizeEmoji;
-
-  bg.style.backgroundImage = `url("${GAME_CONFIG.backgroundImage}")`;
-
-  renderLives();
+function init(){
+  round = 0;
+  lives = 3;
+  document.getElementById("overlay").style.display="none";
   startRound();
-  updateAim(aimX, aimY);
 }
 
-function renderLives() {
-  livesBox.innerHTML = "";
-  for (let i = 0; i < GAME_CONFIG.livesTotal; i++) {
-    const heart = document.createElement("div");
-    heart.className = "heart" + (i >= lives ? " broken" : "");
-    heart.textContent = i >= lives ? "💔" : "❤️";
-    livesBox.appendChild(heart);
-  }
-}
+function startRound(){
+  const box = document.getElementById("balloons");
+  box.innerHTML="";
 
-function startRound() {
-  locked = false;
-  balloonsBox.innerHTML = "";
+  const words = ["собака","сумка","сок"];
+  const correct = "собака";
 
-  const task = GAME_CONFIG.tasks[currentRound % GAME_CONFIG.tasks.length];
-  taskImg.src = task.image;
-  progressBox.textContent = `${currentRound + 1} / ${GAME_CONFIG.roundsTotal}`;
+  const pos = [20,50,80];
 
-  createBalloons(task);
-}
+  words.forEach((w,i)=>{
+    const b = document.createElement("div");
+    b.className="balloon";
+    b.style.left = pos[i]+"%";
+    b.style.top = CONFIG.balloonY+"%";
 
-function createBalloons(task) {
-  const words = shuffle([...task.words]).slice(0, GAME_CONFIG.balloonsCount);
+    const img = document.createElement("img");
+    img.src = CONFIG.balloons[i].normal;
 
-  if (!words.includes(task.correctWord)) words[0] = task.correctWord;
+    const text = document.createElement("div");
+    text.className="word";
+    text.textContent=w;
 
-  const positions = getBalloonPositions(words.length);
+    b.appendChild(img);
+    b.appendChild(text);
 
-  words.forEach((word, index) => {
-    const balloon = document.createElement("div");
-    balloon.className = "balloon";
-    balloon.style.left = `calc(${positions[index]}% - 95px)`;
-    balloon.style.top = GAME_CONFIG.balloonStopY + "%";
-    balloon.style.animationDuration = GAME_CONFIG.balloonFlyTime + "ms";
+    b.onclick = ()=>{
+      if(w===correct){
+        img.src = CONFIG.balloons[i].pop;
+        setTimeout(()=>{
+          round++;
+          startRound();
+        },1000);
+      } else {
+        lives--;
+      }
+    };
 
-    const body = document.createElement("div");
-    body.className = "balloon-body";
-    body.textContent = word;
-
-    balloon.appendChild(body);
-
-    balloon.addEventListener("click", (e) => {
-      e.stopPropagation();
-      shoot(balloon, word, task.correctWord, aimX, aimY);
-    });
-
-    balloonsBox.appendChild(balloon);
+    box.appendChild(b);
   });
 }
 
-function getBalloonPositions(count) {
-  if (count === 3) return [23, 50, 77];
-  if (count === 4) return [18, 39, 61, 82];
-  if (count === 5) return [12, 31, 50, 69, 88];
-  return Array.from({length: count}, (_, i) => 15 + (70 / Math.max(1, count - 1)) * i);
-}
-
-function shoot(balloon, word, correctWord, x, y) {
-  if (locked) return;
-
-  createShotFlash(x, y);
-
-  if (word === correctWord) {
-    locked = true;
-    balloon.classList.add("pop");
-
-    setTimeout(() => {
-      currentRound++;
-      currentRound >= GAME_CONFIG.roundsTotal ? winGame() : startRound();
-    }, 450);
-  } else {
-    lives--;
-    renderLives();
-    showCross(x, y);
-
-    if (lives <= 0) {
-      locked = true;
-      setTimeout(loseGame, 500);
-    }
-  }
-}
-
-function showCross(x, y) {
-  const cross = document.createElement("div");
-  cross.className = "cross";
-  cross.textContent = "✖";
-  cross.style.left = x - 34 + "px";
-  cross.style.top = y - 50 + "px";
-  game.appendChild(cross);
-  setTimeout(() => cross.remove(), 650);
-}
-
-function createShotFlash(x, y) {
-  const flash = document.createElement("div");
-  flash.className = "shot-flash";
-  flash.style.left = x - 19 + "px";
-  flash.style.top = y - 19 + "px";
-  game.appendChild(flash);
-  setTimeout(() => flash.remove(), 200);
-}
-
-function winGame() {
-  overlay.style.display = "flex";
-  finalTitle.textContent = "Молодец!";
-  finalText.textContent = "Забери свою игрушку!";
-  prize.textContent = GAME_CONFIG.prizeEmoji;
-}
-
-function loseGame() {
-  overlay.style.display = "flex";
-  finalTitle.textContent = "Попробуй ещё раз!";
-  finalText.textContent = "Жизни закончились.";
-  prize.textContent = "💔";
-}
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function updateAim(rawX, rawY) {
-  const minX = GAME_CONFIG.aimPaddingX;
-  const maxX = window.innerWidth - GAME_CONFIG.aimPaddingX;
-  const minY = GAME_CONFIG.aimTopLimit;
-  const maxY = Math.min(window.innerHeight - 180, GAME_CONFIG.aimBottomLimit);
-
-  aimX = clamp(rawX, minX, maxX);
-  aimY = clamp(rawY, minY, maxY);
-
-  aim.style.left = aimX + "px";
-  aim.style.top = aimY + "px";
-
-  const startX = window.innerWidth / 2;
-  const startY = window.innerHeight - 52;
-
-  const dx = aimX - startX;
-  const dy = aimY - startY;
-
-  const length = Math.sqrt(dx * dx + dy * dy);
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-
-  aimLine.style.left = startX + "px";
-  aimLine.style.top = startY + "px";
-  aimLine.style.width = length + "px";
-  aimLine.style.transform = `rotate(${angle}deg)`;
-
-  const gunAngle = clamp(
-    (aimX - startX) / (window.innerWidth / 2) * GAME_CONFIG.gunMaxRotate,
-    -GAME_CONFIG.gunMaxRotate,
-    GAME_CONFIG.gunMaxRotate
-  );
-
-  gun.style.transform = `translateX(-50%) rotate(${gunAngle}deg)`;
-}
-
-document.addEventListener("mousemove", (e) => updateAim(e.clientX, e.clientY));
-window.addEventListener("resize", () => updateAim(aimX, aimY));
-restartBtn.addEventListener("click", init);
-
 init();
+
 </script>
+
 </body>
 </html>

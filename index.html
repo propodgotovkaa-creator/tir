@@ -1,528 +1,325 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Тир: найди слово</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тир: найди слово</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* { box-sizing: border-box; }
 
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      background: #101028;
-    }
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial;
+  background: #0d1238;
+}
 
-    #game {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #29306f, #0d1238 70%);
-      cursor: none;
-      user-select: none;
-    }
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  cursor: none;
+}
 
-    .bg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      z-index: 0;
-    }
+.bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #2b2f7a, #0d1238 70%);
+}
 
-    .task-panel {
-      position: absolute;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      padding: 12px 20px;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.9);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+.task-panel {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 10;
+}
 
-    .task-panel span {
-      font-size: 24px;
-      font-weight: 800;
-      color: #31245e;
-    }
+.task-panel span {
+  font-weight: 800;
+  font-size: 22px;
+}
 
-    .task-img {
-      width: 86px;
-      height: 86px;
-      object-fit: contain;
-    }
+.task-img {
+  width: 80px;
+}
 
-    .lives {
-      position: absolute;
-      top: 22px;
-      left: 22px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+.lives {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
 
-    .heart {
-      font-size: 34px;
-      filter: drop-shadow(0 4px 5px rgba(0,0,0,0.25));
-      transition: transform 0.2s, opacity 0.2s;
-    }
+.heart {
+  font-size: 32px;
+}
 
-    .heart.broken {
-      opacity: 0.35;
-      transform: scale(0.85) rotate(-12deg);
-    }
+.heart.broken {
+  opacity: 0.3;
+}
 
-    .progress {
-      position: absolute;
-      right: 22px;
-      top: 22px;
-      z-index: 10;
-      padding: 10px 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.9);
-      font-size: 22px;
-      font-weight: 800;
-      color: #31245e;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.22);
-    }
+.progress {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #fff;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-weight: 800;
+}
 
-    .balloon {
-      position: absolute;
-      width: 180px;
-      height: 210px;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: flyUp var(--fly-time) ease-out forwards;
-      transform-origin: center bottom;
-    }
+.balloon {
+  position: absolute;
+  width: 150px;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: flyUp 0.8s ease-out forwards;
+}
 
-    .balloon-body {
-      width: 160px;
-      height: 170px;
-      border-radius: 50% 50% 46% 46%;
-      background: linear-gradient(145deg, #ffdb61, #ff8e3c);
-      box-shadow: inset -14px -18px 28px rgba(0,0,0,0.12),
-                  inset 12px 12px 18px rgba(255,255,255,0.45),
-                  0 10px 20px rgba(0,0,0,0.22);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: 900;
-      color: #33205c;
-    }
+.balloon-body {
+  background: orange;
+  border-radius: 50%;
+  padding: 20px;
+  font-weight: 900;
+  text-align: center;
+}
 
-    .balloon::after {
-      content: "";
-      position: absolute;
-      bottom: 14px;
-      left: 50%;
-      width: 2px;
-      height: 42px;
-      background: rgba(255,255,255,0.75);
-      transform: translateX(-50%);
-    }
+@keyframes flyUp {
+  from { transform: translateY(300px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 
-    .balloon.pop {
-      animation: pop 0.35s ease-out forwards;
-      pointer-events: none;
-    }
+.gun {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 80px;
+  z-index: 20;
+}
 
-    @keyframes flyUp {
-      from {
-        transform: translateY(45vh) scale(0.85);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
-    }
+.aim {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 3px solid white;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+}
 
-    @keyframes pop {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.25); opacity: 0.8; }
-      100% { transform: scale(0); opacity: 0; }
-    }
+.aim-line {
+  position: absolute;
+  height: 3px;
+  background: white;
+  transform-origin: left;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 25;
+}
 
-    .cross {
-      position: absolute;
-      z-index: 30;
-      font-size: 72px;
-      color: #ff3b3b;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.35);
-      animation: crossAnim 0.6s ease-out forwards;
-      pointer-events: none;
-    }
+.cross {
+  position: absolute;
+  font-size: 60px;
+  color: red;
+  z-index: 50;
+}
 
-    @keyframes crossAnim {
-      from { transform: scale(0.4); opacity: 0; }
-      40% { transform: scale(1.15); opacity: 1; }
-      to { transform: scale(1); opacity: 0; }
-    }
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.7);
+}
 
-    .gun {
-      position: absolute;
-      z-index: 40;
-      width: 110px;
-      height: 80px;
-      pointer-events: none;
-      transform: translate(-20px, -20px);
-      font-size: 68px;
-      filter: drop-shadow(0 8px 10px rgba(0,0,0,0.35));
-    }
-
-    .shot-flash {
-      position: absolute;
-      z-index: 39;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fff 0%, #ffe66d 40%, transparent 75%);
-      animation: flash 0.18s ease-out forwards;
-      pointer-events: none;
-    }
-
-    @keyframes flash {
-      from { transform: scale(0.5); opacity: 1; }
-      to { transform: scale(2.4); opacity: 0; }
-    }
-
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 100;
-      background: rgba(10, 8, 36, 0.78);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 30px;
-    }
-
-    .modal {
-      max-width: 560px;
-      width: 90%;
-      padding: 34px;
-      border-radius: 34px;
-      background: rgba(255,255,255,0.96);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      color: #31245e;
-    }
-
-    .modal h2 {
-      margin: 0 0 18px;
-      font-size: 38px;
-    }
-
-    .modal p {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 12px 0 24px;
-    }
-
-    .prize {
-      font-size: 86px;
-      margin: 10px 0;
-    }
-
-    button {
-      border: 0;
-      border-radius: 18px;
-      padding: 14px 24px;
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      background: linear-gradient(135deg, #7d5cff, #ff64c8);
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-    }
-  </style>
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+}
+</style>
 </head>
 
 <body>
-  <div id="game">
-    <div class="bg" id="bg"></div>
 
-    <div class="lives" id="lives"></div>
+<div id="game">
 
-    <div class="progress" id="progress">1 / 8</div>
+  <div class="bg"></div>
 
-    <div class="task-panel">
-      <span>Найди слово:</span>
-      <img class="task-img" id="taskImg" alt="">
-    </div>
+  <div class="task-panel">
+    <span>Найди:</span>
+    <img id="taskImg" class="task-img">
+  </div>
 
-    <div id="balloons"></div>
+  <div class="lives" id="lives"></div>
+  <div class="progress" id="progress"></div>
 
-    <div class="gun" id="gun">🔫</div>
+  <div id="balloons"></div>
 
-    <div class="overlay" id="overlay">
-      <div class="modal">
-        <div class="prize" id="prize">🧸</div>
-        <h2 id="finalTitle">Молодец!</h2>
-        <p id="finalText">Забери свою игрушку!</p>
-        <button id="restartBtn">Играть снова</button>
-      </div>
+  <div class="gun">🔫</div>
+  <div class="aim" id="aim"></div>
+  <div class="aim-line" id="aimLine"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2 id="finalText"></h2>
+      <button onclick="init()">Играть снова</button>
     </div>
   </div>
 
-  <script>
-    const GAME_CONFIG = {
-      roundsTotal: 8,
-      livesTotal: 3,
-      balloonsCount: 3,
+</div>
 
-      balloonFlyTime: 900,
-      balloonStopY: 42,
+<script>
 
-      showFeedback: true,
-      language: "ru",
+const GAME_CONFIG = {
+  roundsTotal: 8,
+  livesTotal: 3,
+  balloonsCount: 3,
 
-      backgroundImage: "",
+  tasks: [
+    { image: "https://dummyimage.com/100x100&text=🐶", correct: "собака", words: ["собака","сумка","сок"] },
+    { image: "https://dummyimage.com/100x100&text=🦉", correct: "сова", words: ["сова","сыр","сок"] },
+    { image: "https://dummyimage.com/100x100&text=✈️", correct: "самолет", words: ["самолет","сумка","сыр"] }
+  ]
+};
 
-      prizeEmoji: "🧸",
+let round = 0;
+let lives = GAME_CONFIG.livesTotal;
 
-      tasks: [
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🐶",
-          correctWord: "собака",
-          words: ["медуза", "собака", "сумка"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🦉",
-          correctWord: "сова",
-          words: ["сова", "сыр", "сок"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=✈️",
-          correctWord: "самолёт",
-          words: ["самолёт", "санки", "сундук"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🧀",
-          correctWord: "сыр",
-          words: ["сумка", "сыр", "самокат"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🧃",
-          correctWord: "сок",
-          words: ["сок", "соты", "сапоги"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🛷",
-          correctWord: "санки",
-          words: ["сова", "санки", "сумка"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=👜",
-          correctWord: "сумка",
-          words: ["сыр", "сумка", "сок"]
-        },
-        {
-          image: "https://dummyimage.com/160x160/fff3a6/333&text=🧰",
-          correctWord: "сундук",
-          words: ["самокат", "сундук", "сова"]
-        }
-      ]
-    };
+const balloonsBox = document.getElementById("balloons");
+const taskImg = document.getElementById("taskImg");
+const livesBox = document.getElementById("lives");
+const progressBox = document.getElementById("progress");
 
-    const game = document.getElementById("game");
-    const bg = document.getElementById("bg");
-    const taskImg = document.getElementById("taskImg");
-    const balloonsBox = document.getElementById("balloons");
-    const livesBox = document.getElementById("lives");
-    const progressBox = document.getElementById("progress");
-    const gun = document.getElementById("gun");
-    const overlay = document.getElementById("overlay");
-    const finalTitle = document.getElementById("finalTitle");
-    const finalText = document.getElementById("finalText");
-    const prize = document.getElementById("prize");
-    const restartBtn = document.getElementById("restartBtn");
+function init() {
+  round = 0;
+  lives = GAME_CONFIG.livesTotal;
+  document.getElementById("overlay").style.display = "none";
+  renderLives();
+  startRound();
+}
 
-    let currentRound = 0;
-    let lives = GAME_CONFIG.livesTotal;
-    let locked = false;
+function renderLives() {
+  livesBox.innerHTML = "";
+  for (let i=0;i<GAME_CONFIG.livesTotal;i++){
+    const h = document.createElement("div");
+    h.className = "heart" + (i>=lives?" broken":"");
+    h.textContent = "❤️";
+    livesBox.appendChild(h);
+  }
+}
 
-    function init() {
-      currentRound = 0;
-      lives = GAME_CONFIG.livesTotal;
-      locked = false;
+function startRound() {
+  balloonsBox.innerHTML = "";
 
-      overlay.style.display = "none";
-      prize.textContent = GAME_CONFIG.prizeEmoji;
+  const task = GAME_CONFIG.tasks[round % GAME_CONFIG.tasks.length];
+  taskImg.src = task.image;
+  progressBox.textContent = `${round+1}/${GAME_CONFIG.roundsTotal}`;
 
-      if (GAME_CONFIG.backgroundImage) {
-        bg.style.backgroundImage = `url("${GAME_CONFIG.backgroundImage}")`;
-      }
+  const positions = [20,50,80];
 
-      renderLives();
+  task.words.forEach((word,i)=>{
+    const b = document.createElement("div");
+    b.className = "balloon";
+    b.style.left = positions[i]+"%";
+    b.style.top = "40%";
+
+    const body = document.createElement("div");
+    body.className = "balloon-body";
+    body.textContent = word;
+
+    b.appendChild(body);
+
+    b.onclick = (e)=> shoot(word, task.correct, e);
+
+    balloonsBox.appendChild(b);
+  });
+}
+
+function shoot(word, correct, e) {
+
+  if(word === correct){
+    round++;
+
+    if(round>=GAME_CONFIG.roundsTotal){
+      win();
+    } else {
       startRound();
     }
 
-    function renderLives() {
-      livesBox.innerHTML = "";
+  } else {
+    lives--;
+    renderLives();
 
-      for (let i = 0; i < GAME_CONFIG.livesTotal; i++) {
-        const heart = document.createElement("div");
-        heart.className = "heart" + (i >= lives ? " broken" : "");
-        heart.textContent = i >= lives ? "💔" : "❤️";
-        livesBox.appendChild(heart);
-      }
+    showCross(e.clientX,e.clientY);
+
+    if(lives<=0){
+      lose();
     }
+  }
+}
 
-    function startRound() {
-      locked = false;
-      balloonsBox.innerHTML = "";
+function showCross(x,y){
+  const c = document.createElement("div");
+  c.className = "cross";
+  c.textContent = "✖";
+  c.style.left = x+"px";
+  c.style.top = y+"px";
+  document.body.appendChild(c);
 
-      const task = GAME_CONFIG.tasks[currentRound % GAME_CONFIG.tasks.length];
+  setTimeout(()=>c.remove(),600);
+}
 
-      taskImg.src = task.image;
-      progressBox.textContent = `${currentRound + 1} / ${GAME_CONFIG.roundsTotal}`;
+function win(){
+  document.getElementById("overlay").style.display="flex";
+  document.getElementById("finalText").textContent="Ты молодец!";
+}
 
-      createBalloons(task);
-    }
+function lose(){
+  document.getElementById("overlay").style.display="flex";
+  document.getElementById("finalText").textContent="Попробуй ещё раз";
+}
 
-    function createBalloons(task) {
-      const words = shuffle([...task.words]).slice(0, GAME_CONFIG.balloonsCount);
+const aim = document.getElementById("aim");
+const aimLine = document.getElementById("aimLine");
 
-      if (!words.includes(task.correctWord)) {
-        words[0] = task.correctWord;
-      }
+document.addEventListener("mousemove",(e)=>{
+  aim.style.left = e.clientX+"px";
+  aim.style.top = e.clientY+"px";
 
-      const positions = getBalloonPositions(words.length);
+  const sx = window.innerWidth/2;
+  const sy = window.innerHeight-50;
 
-      words.forEach((word, index) => {
-        const balloon = document.createElement("div");
-        balloon.className = "balloon";
-        balloon.style.left = positions[index] + "%";
-        balloon.style.top = GAME_CONFIG.balloonStopY + "%";
-        balloon.style.setProperty("--fly-time", GAME_CONFIG.balloonFlyTime + "ms");
+  const dx = e.clientX - sx;
+  const dy = e.clientY - sy;
 
-        const body = document.createElement("div");
-        body.className = "balloon-body";
-        body.textContent = word;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const ang = Math.atan2(dy,dx)*180/Math.PI;
 
-        balloon.appendChild(body);
+  aimLine.style.left = sx+"px";
+  aimLine.style.top = sy+"px";
+  aimLine.style.width = len+"px";
+  aimLine.style.transform = `rotate(${ang}deg)`;
+});
 
-        balloon.addEventListener("click", (e) => {
-          e.stopPropagation();
-          shoot(balloon, word, task.correctWord, e.clientX, e.clientY);
-        });
+init();
 
-        balloonsBox.appendChild(balloon);
-      });
-    }
-
-    function getBalloonPositions(count) {
-      if (count === 3) return [22, 50, 78];
-      if (count === 4) return [18, 39, 61, 82];
-      if (count === 5) return [12, 31, 50, 69, 88];
-
-      const result = [];
-      for (let i = 0; i < count; i++) {
-        result.push(15 + (70 / Math.max(1, count - 1)) * i);
-      }
-      return result;
-    }
-
-    function shoot(balloon, word, correctWord, x, y) {
-      if (locked) return;
-
-      createShotFlash(x, y);
-
-      if (word === correctWord) {
-        locked = true;
-        balloon.classList.add("pop");
-
-        setTimeout(() => {
-          currentRound++;
-
-          if (currentRound >= GAME_CONFIG.roundsTotal) {
-            winGame();
-          } else {
-            startRound();
-          }
-        }, 450);
-
-      } else {
-        lives--;
-        renderLives();
-
-        if (GAME_CONFIG.showFeedback) {
-          showCross(x, y);
-        }
-
-        if (lives <= 0) {
-          setTimeout(loseGame, 500);
-        }
-      }
-    }
-
-    function showCross(x, y) {
-      const cross = document.createElement("div");
-      cross.className = "cross";
-      cross.textContent = "✖";
-      cross.style.left = x - 34 + "px";
-      cross.style.top = y - 50 + "px";
-      game.appendChild(cross);
-
-      setTimeout(() => cross.remove(), 650);
-    }
-
-    function createShotFlash(x, y) {
-      const flash = document.createElement("div");
-      flash.className = "shot-flash";
-      flash.style.left = x - 17 + "px";
-      flash.style.top = y - 17 + "px";
-      game.appendChild(flash);
-
-      setTimeout(() => flash.remove(), 200);
-    }
-
-    function winGame() {
-      overlay.style.display = "flex";
-      finalTitle.textContent = "Молодец!";
-      finalText.textContent = "Забери свою игрушку!";
-      prize.textContent = GAME_CONFIG.prizeEmoji;
-    }
-
-    function loseGame() {
-      overlay.style.display = "flex";
-      finalTitle.textContent = "Попробуй ещё раз!";
-      finalText.textContent = "Жизни закончились.";
-      prize.textContent = "💔";
-    }
-
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
-
-    document.addEventListener("mousemove", (e) => {
-      gun.style.left = e.clientX + "px";
-      gun.style.top = e.clientY + "px";
-    });
-
-    restartBtn.addEventListener("click", init);
-
-    init();
-  </script>
+</script>
 </body>
 </html>

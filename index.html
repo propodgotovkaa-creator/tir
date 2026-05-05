@@ -23,13 +23,15 @@ html, body {
   height: 100vh;
   overflow: hidden;
   cursor: none;
-  background: radial-gradient(circle at center, #30338a, #10133d 75%);
+  background: #0d1238;
 }
 
 .bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, #30338a, #10133d 75%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   z-index: 0;
 }
 
@@ -140,14 +142,8 @@ html, body {
 }
 
 @keyframes flyUp {
-  from {
-    transform: translateY(45vh) scale(0.85);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+  from { transform: translateY(45vh) scale(0.85); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 @keyframes pop {
@@ -282,24 +278,9 @@ html, body {
   border-radius: 32px;
   background: rgba(255,255,255,0.96);
   color: #30245f;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.38);
 }
 
-.modal h2 {
-  margin: 0 0 14px;
-  font-size: 38px;
-}
-
-.modal p {
-  margin: 10px 0 24px;
-  font-size: 24px;
-  font-weight: 800;
-}
-
-.prize {
-  font-size: 88px;
-  margin-bottom: 10px;
-}
+.prize { font-size: 88px; margin-bottom: 10px; }
 
 button {
   border: 0;
@@ -327,16 +308,13 @@ button {
   </div>
 
   <div id="balloons"></div>
-
   <div class="aim-line" id="aimLine"></div>
 
   <div class="gun" id="gun">
     <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png" alt="Пистолет">
   </div>
 
-  <div class="aim" id="aim">
-    <div class="aim-dot"></div>
-  </div>
+  <div class="aim" id="aim"><div class="aim-dot"></div></div>
 
   <div class="overlay" id="overlay">
     <div class="modal">
@@ -353,61 +331,27 @@ const GAME_CONFIG = {
   roundsTotal: 8,
   livesTotal: 3,
   balloonsCount: 3,
-
   balloonFlyTime: 900,
   balloonStopY: 39,
-
   aimPaddingX: 120,
   aimTopLimit: 130,
   aimBottomLimit: 520,
-
   gunMaxRotate: 24,
-
   showFeedback: true,
-  backgroundImage: "",
+
+  backgroundImage: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/60fe98cf0899a039719a76c82b8cdf4f39200511/image.png",
+
   prizeEmoji: "🧸",
 
   tasks: [
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🐶",
-      correctWord: "собака",
-      words: ["медуза", "собака", "сумка"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🦉",
-      correctWord: "сова",
-      words: ["сова", "сыр", "сок"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=✈️",
-      correctWord: "самолёт",
-      words: ["самолёт", "санки", "сундук"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧀",
-      correctWord: "сыр",
-      words: ["сумка", "сыр", "самокат"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧃",
-      correctWord: "сок",
-      words: ["сок", "соты", "сапоги"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🛷",
-      correctWord: "санки",
-      words: ["сова", "санки", "сумка"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=👜",
-      correctWord: "сумка",
-      words: ["сыр", "сумка", "сок"]
-    },
-    {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧰",
-      correctWord: "сундук",
-      words: ["самокат", "сундук", "сова"]
-    }
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🐶", correctWord: "собака", words: ["медуза", "собака", "сумка"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🦉", correctWord: "сова", words: ["сова", "сыр", "сок"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=✈️", correctWord: "самолёт", words: ["самолёт", "санки", "сундук"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧀", correctWord: "сыр", words: ["сумка", "сыр", "самокат"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧃", correctWord: "сок", words: ["сок", "соты", "сапоги"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🛷", correctWord: "санки", words: ["сова", "санки", "сумка"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=👜", correctWord: "сумка", words: ["сыр", "сумка", "сок"] },
+    { image: "https://dummyimage.com/160x160/fff3a6/333&text=🧰", correctWord: "сундук", words: ["самокат", "сундук", "сова"] }
   ]
 };
 
@@ -429,7 +373,6 @@ const gun = document.getElementById("gun");
 let currentRound = 0;
 let lives = GAME_CONFIG.livesTotal;
 let locked = false;
-
 let aimX = window.innerWidth / 2;
 let aimY = window.innerHeight / 2;
 
@@ -437,15 +380,10 @@ function init() {
   currentRound = 0;
   lives = GAME_CONFIG.livesTotal;
   locked = false;
-
   overlay.style.display = "none";
   prize.textContent = GAME_CONFIG.prizeEmoji;
 
-  if (GAME_CONFIG.backgroundImage) {
-    bg.style.backgroundImage = `url("${GAME_CONFIG.backgroundImage}")`;
-    bg.style.backgroundSize = "cover";
-    bg.style.backgroundPosition = "center";
-  }
+  bg.style.backgroundImage = `url("${GAME_CONFIG.backgroundImage}")`;
 
   renderLives();
   startRound();
@@ -454,7 +392,6 @@ function init() {
 
 function renderLives() {
   livesBox.innerHTML = "";
-
   for (let i = 0; i < GAME_CONFIG.livesTotal; i++) {
     const heart = document.createElement("div");
     heart.className = "heart" + (i >= lives ? " broken" : "");
@@ -468,7 +405,6 @@ function startRound() {
   balloonsBox.innerHTML = "";
 
   const task = GAME_CONFIG.tasks[currentRound % GAME_CONFIG.tasks.length];
-
   taskImg.src = task.image;
   progressBox.textContent = `${currentRound + 1} / ${GAME_CONFIG.roundsTotal}`;
 
@@ -478,9 +414,7 @@ function startRound() {
 function createBalloons(task) {
   const words = shuffle([...task.words]).slice(0, GAME_CONFIG.balloonsCount);
 
-  if (!words.includes(task.correctWord)) {
-    words[0] = task.correctWord;
-  }
+  if (!words.includes(task.correctWord)) words[0] = task.correctWord;
 
   const positions = getBalloonPositions(words.length);
 
@@ -510,12 +444,7 @@ function getBalloonPositions(count) {
   if (count === 3) return [23, 50, 77];
   if (count === 4) return [18, 39, 61, 82];
   if (count === 5) return [12, 31, 50, 69, 88];
-
-  const result = [];
-  for (let i = 0; i < count; i++) {
-    result.push(15 + (70 / Math.max(1, count - 1)) * i);
-  }
-  return result;
+  return Array.from({length: count}, (_, i) => 15 + (70 / Math.max(1, count - 1)) * i);
 }
 
 function shoot(balloon, word, correctWord, x, y) {
@@ -529,21 +458,12 @@ function shoot(balloon, word, correctWord, x, y) {
 
     setTimeout(() => {
       currentRound++;
-
-      if (currentRound >= GAME_CONFIG.roundsTotal) {
-        winGame();
-      } else {
-        startRound();
-      }
+      currentRound >= GAME_CONFIG.roundsTotal ? winGame() : startRound();
     }, 450);
-
   } else {
     lives--;
     renderLives();
-
-    if (GAME_CONFIG.showFeedback) {
-      showCross(x, y);
-    }
+    showCross(x, y);
 
     if (lives <= 0) {
       locked = true;
@@ -559,7 +479,6 @@ function showCross(x, y) {
   cross.style.left = x - 34 + "px";
   cross.style.top = y - 50 + "px";
   game.appendChild(cross);
-
   setTimeout(() => cross.remove(), 650);
 }
 
@@ -569,7 +488,6 @@ function createShotFlash(x, y) {
   flash.style.left = x - 19 + "px";
   flash.style.top = y - 19 + "px";
   game.appendChild(flash);
-
   setTimeout(() => flash.remove(), 200);
 }
 
@@ -598,7 +516,6 @@ function clamp(value, min, max) {
 function updateAim(rawX, rawY) {
   const minX = GAME_CONFIG.aimPaddingX;
   const maxX = window.innerWidth - GAME_CONFIG.aimPaddingX;
-
   const minY = GAME_CONFIG.aimTopLimit;
   const maxY = Math.min(window.innerHeight - 180, GAME_CONFIG.aimBottomLimit);
 
@@ -622,22 +539,17 @@ function updateAim(rawX, rawY) {
   aimLine.style.width = length + "px";
   aimLine.style.transform = `rotate(${angle}deg)`;
 
-  const gunAngle = clamp((aimX - startX) / (window.innerWidth / 2) * GAME_CONFIG.gunMaxRotate, -GAME_CONFIG.gunMaxRotate, GAME_CONFIG.gunMaxRotate);
+  const gunAngle = clamp(
+    (aimX - startX) / (window.innerWidth / 2) * GAME_CONFIG.gunMaxRotate,
+    -GAME_CONFIG.gunMaxRotate,
+    GAME_CONFIG.gunMaxRotate
+  );
+
   gun.style.transform = `translateX(-50%) rotate(${gunAngle}deg)`;
 }
 
-document.addEventListener("mousemove", (e) => {
-  updateAim(e.clientX, e.clientY);
-});
-
-document.addEventListener("click", () => {
-  createShotFlash(aimX, aimY);
-});
-
-window.addEventListener("resize", () => {
-  updateAim(aimX, aimY);
-});
-
+document.addEventListener("mousemove", (e) => updateAim(e.clientX, e.clientY));
+window.addEventListener("resize", () => updateAim(aimX, aimY));
 restartBtn.addEventListener("click", init);
 
 init();

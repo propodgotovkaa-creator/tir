@@ -146,26 +146,35 @@ function collectConfig() {
   };
 }
 
-function escapeAttr(str) {
-  return str
-    .replace(/&/g,"&amp;")
-    .replace(/'/g,"&#39;")
-    .replace(/"/g,"&quot;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
-}
-
 function generateCode() {
-  const config = collectConfig();
-  const gameHtml = buildGameHTML(config);
-  const iframe = `<iframe style="width:100%;height:100%;border:0;position:absolute;top:0;left:0;" srcdoc='${escapeAttr(gameHtml)}'></iframe>`;
-  document.getElementById("output").value = iframe;
+  try {
+    const config = collectConfig();
+    const gameHtml = buildGameHTML(config);
+    const encoded = encodeURIComponent(gameHtml);
+
+    const iframe = `<iframe style="width:100%;height:100%;border:0;position:absolute;top:0;left:0;" src="data:text/html;charset=utf-8,${encoded}"></iframe>`;
+
+    document.getElementById("output").value = iframe;
+  } catch (err) {
+    alert("Ошибка генерации кода: " + err.message);
+    console.error(err);
+  }
 }
 
 function copyCode() {
   const out = document.getElementById("output");
-  out.select();
-  document.execCommand("copy");
+
+  if (!out.value.trim()) {
+    generateCode();
+  }
+
+  navigator.clipboard.writeText(out.value).then(() => {
+    alert("Код скопирован!");
+  }).catch(() => {
+    out.select();
+    document.execCommand("copy");
+    alert("Код скопирован!");
+  });
 }
 
 function buildGameHTML(userConfig) {

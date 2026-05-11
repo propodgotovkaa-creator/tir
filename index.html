@@ -44,22 +44,24 @@ html, body {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 22px;
+  padding: 14px 26px;
   border-radius: 24px;
   background: rgba(255,255,255,0.94);
   box-shadow: 0 10px 28px rgba(0,0,0,0.28);
 }
 
 .task-panel span {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
   color: #30245f;
 }
 
-.task-img {
-  width: 86px;
-  height: 86px;
-  object-fit: contain;
+.task-word {
+  font-size: 42px;
+  font-weight: 900;
+  color: #30245f;
+  line-height: 1;
+  text-transform: lowercase;
 }
 
 .lives {
@@ -317,7 +319,7 @@ button {
 
   <div class="task-panel">
     <span>Найди:</span>
-    <img id="taskImg" class="task-img" alt="">
+    <div id="taskWord" class="task-word"></div>
   </div>
 
   <div id="balloons"></div>
@@ -381,42 +383,34 @@ const GAME_CONFIG = {
 
   tasks: [
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🐶",
       correctWord: "собака",
       words: ["медуза", "собака", "сумка"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🦉",
       correctWord: "сова",
       words: ["сова", "сыр", "сок"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=✈️",
       correctWord: "самолёт",
       words: ["самолёт", "санки", "сундук"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧀",
       correctWord: "сыр",
       words: ["сумка", "сыр", "самокат"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧃",
       correctWord: "сок",
       words: ["сок", "соты", "сапоги"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🛷",
       correctWord: "санки",
       words: ["сова", "санки", "сумка"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=👜",
       correctWord: "сумка",
       words: ["сыр", "сумка", "сок"]
     },
     {
-      image: "https://dummyimage.com/160x160/fff3a6/333&text=🧰",
       correctWord: "сундук",
       words: ["самокат", "сундук", "сова"]
     }
@@ -425,7 +419,7 @@ const GAME_CONFIG = {
 
 const game = document.getElementById("game");
 const bg = document.getElementById("bg");
-const taskImg = document.getElementById("taskImg");
+const taskWord = document.getElementById("taskWord");
 const balloonsBox = document.getElementById("balloons");
 const livesBox = document.getElementById("lives");
 const progressBox = document.getElementById("progress");
@@ -475,7 +469,7 @@ function startRound() {
 
   const task = GAME_CONFIG.tasks[currentRound % GAME_CONFIG.tasks.length];
 
-  taskImg.src = task.image;
+  taskWord.textContent = task.correctWord;
   progressBox.textContent = `${currentRound + 1} / ${GAME_CONFIG.roundsTotal}`;
 
   createBalloons(task);

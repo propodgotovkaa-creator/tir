@@ -3,134 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Тир: найди слово</title>
+<title>Редактор игры «Тир»</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f4fb;color:#222}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+h1{margin:0 0 18px}
+.card{background:white;border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+label{font-weight:700;display:block;margin:10px 0 6px}
+input,textarea,button{font-family:inherit}
+input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;font-size:15px}
+.round{border:2px solid #e6e6f0;border-radius:16px;padding:14px;margin:14px 0;background:#fafaff}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+button{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:800;cursor:pointer}
+.primary{background:#6d5cff;color:white}
+.secondary{background:#e7e7f5;color:#30245f}
+.danger{background:#ffdddd;color:#a60000}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.output{height:220px}
+.preview-img{width:80px;height:80px;object-fit:contain;margin-top:8px;border:1px dashed #bbb;border-radius:10px;background:white}
+.small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Редактор игры «Тир: найди слово»</h1>
 
+  <div class="card">
+    <label>Количество раундов</label>
+    <input id="roundsTotal" type="number" min="1" max="30" value="8">
+  </div>
+
+  <div class="card">
+    <h2>Раунды</h2>
+    <div id="roundsBox"></div>
+    <div class="actions">
+      <button class="secondary" onclick="addRound()">+ Добавить раунд</button>
+      <button class="primary" onclick="generateCode()">Сгенерировать код для Genially</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Готовый iframe-код</h2>
+    <p class="small">Скопируй этот код и вставь в Genially как embed/iframe. Потом растяни iframe на слайде.</p>
+    <textarea id="output" class="output" readonly></textarea>
+    <br><br>
+    <button class="primary" onclick="copyCode()">Скопировать код</button>
+  </div>
+</div>
+
+<script>
+let roundCounter = 0;
+
+const defaultRounds = [
+  {image:"https://dummyimage.com/220x220/ffffff/30245f&text=собака", correctWord:"собака", words:["медуза","собака","сумка"]},
+  {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сова", correctWord:"сова", words:["сова","сыр","сок"]},
+  {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сок", correctWord:"сок", words:["сыр","сок","санки"]}
+];
+
+function addRound(data={}){
+  roundCounter++;
+  const d = data.correctWord ? data : {
+    image:"",
+    correctWord:"",
+    words:["","",""]
+  };
+
+  const box = document.createElement("div");
+  box.className = "round";
+  box.dataset.id = roundCounter;
+
+  box.innerHTML = `
+    <h3>Раунд ${roundCounter}</h3>
+
+    <label>Картинка задания</label>
+    <input type="file" accept="image/*" onchange="loadImageFile(this)">
+    <input class="imageUrl" placeholder="или вставь ссылку на картинку" value="${d.image || ""}">
+    <img class="preview-img" src="${d.image || ""}" style="${d.image ? "" : "display:none"}">
+
+    <label>Правильное слово</label>
+    <input class="correctWord" placeholder="например: сок" value="${d.correctWord || ""}">
+
+    <label>Слова на шариках</label>
+    <div class="grid">
+      <input class="word" placeholder="слово 1" value="${d.words?.[0] || ""}">
+      <input class="word" placeholder="слово 2" value="${d.words?.[1] || ""}">
+      <input class="word" placeholder="слово 3" value="${d.words?.[2] || ""}">
+    </div>
+
+    <br>
+    <button class="danger" onclick="this.closest('.round').remove()">Удалить раунд</button>
+  `;
+
+  document.getElementById("roundsBox").appendChild(box);
+}
+
+function loadImageFile(input){
+  const file = input.files[0];
+  if(!file)return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const round = input.closest(".round");
+    round.querySelector(".imageUrl").value = e.target.result;
+    const img = round.querySelector(".preview-img");
+    img.src = e.target.result;
+    img.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+}
+
+function collectConfig(){
+  const rounds = [...document.querySelectorAll(".round")].map(r=>{
+    const image = r.querySelector(".imageUrl").value.trim();
+    const correctWord = r.querySelector(".correctWord").value.trim();
+    const words = [...r.querySelectorAll(".word")].map(i=>i.value.trim()).filter(Boolean);
+
+    return {
+      image: image || "https://dummyimage.com/220x220/ffffff/30245f&text=" + encodeURIComponent(correctWord || "?"),
+      correctWord: correctWord || words[0] || "",
+      words: words.length ? words : [correctWord,"",""]
+    };
+  }).filter(r=>r.correctWord);
+
+  return {
+    roundsTotal: Number(document.getElementById("roundsTotal").value) || rounds.length || 1,
+    tasks: rounds.length ? rounds : defaultRounds
+  };
+}
+
+function escapeAttr(str){
+  return str
+    .replace(/&/g,"&amp;")
+    .replace(/'/g,"&#39;")
+    .replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+function generateCode(){
+  const config = collectConfig();
+  const gameHtml = buildGameHTML(config);
+  const iframe = `<iframe style="width:100%;height:100%;border:0;position:absolute;top:0;left:0;" srcdoc='${escapeAttr(gameHtml)}'></iframe>`;
+  document.getElementById("output").value = iframe;
+}
+
+function copyCode(){
+  const out = document.getElementById("output");
+  out.select();
+  document.execCommand("copy");
+}
+
+function buildGameHTML(userConfig){
+const userConfigJSON = JSON.stringify(userConfig);
+
+return `<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#0d1238}
 #game{position:relative;width:100vw;height:100vh;overflow:hidden;cursor:none;background:#0d1238}
 #game.final-mode{cursor:default}
 .bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0}
-
 .task-panel{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;background:transparent;box-shadow:none;padding:0}
 .task-img{width:125px;height:125px;object-fit:contain;display:block}
-
 .lives{position:absolute;top:22px;left:22px;z-index:20;display:flex;flex-direction:column;gap:8px}
 .heart{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
-
 .progress{position:absolute;top:22px;right:22px;z-index:20;padding:10px 16px;border-radius:18px;background:rgba(255,255,255,.94);color:#30245f;font-size:22px;font-weight:900;box-shadow:0 10px 28px rgba(0,0,0,.26)}
-
 .balloon{position:absolute;width:300px;height:340px;display:flex;justify-content:center;align-items:center;animation:flyUp .9s ease-out forwards;z-index:8}
 .balloon img{width:270px;height:270px;object-fit:contain;display:block;pointer-events:none}
 .balloon-word{position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:3;font-size:30px;font-weight:900;color:#fff;text-align:center;line-height:1.05;padding:6px 14px;border-radius:16px;background:rgba(30,20,80,.72);text-shadow:0 3px 6px rgba(0,0,0,.45);box-shadow:0 6px 16px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
 .balloon.popped .balloon-word{display:none}
 @keyframes flyUp{from{transform:translateY(45vh) scale(.85);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-
 .gun{position:absolute;left:50%;bottom:-18px;width:330px;z-index:40;pointer-events:none;transform-origin:50% 90%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45))}
 .gun img{width:100%;height:auto;display:block}
-
 .aim{position:absolute;width:62px;height:62px;border:3px solid rgba(255,255,255,.95);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:50;box-shadow:0 0 8px rgba(255,255,255,.9),0 0 20px rgba(79,214,255,.75),inset 0 0 12px rgba(79,214,255,.45)}
 .aim::before,.aim::after{content:"";position:absolute;background:rgba(255,255,255,.95);box-shadow:0 0 8px rgba(79,214,255,.9)}
 .aim::before{width:82px;height:2px;left:-13px;top:50%}
 .aim::after{width:2px;height:82px;left:50%;top:-13px}
 .aim-dot{position:absolute;width:8px;height:8px;left:50%;top:50%;border-radius:50%;background:#ff4747;transform:translate(-50%,-50%);box-shadow:0 0 10px #ff4747}
 .aim-line{position:absolute;height:3px;background:linear-gradient(90deg,rgba(79,214,255,.05),rgba(79,214,255,.75));transform-origin:left center;pointer-events:none;opacity:.65;z-index:35;box-shadow:0 0 12px rgba(79,214,255,.6)}
-
 .shot-flash{position:absolute;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#ffe66d 40%,transparent 75%);animation:flash .18s ease-out forwards;pointer-events:none;z-index:55}
 @keyframes flash{from{transform:scale(.5);opacity:1}to{transform:scale(2.4);opacity:0}}
-
 .cross{position:absolute;z-index:70;font-size:72px;color:#ff3030;text-shadow:0 4px 16px rgba(0,0,0,.45);pointer-events:none;animation:crossAnim .65s ease-out forwards}
 @keyframes crossAnim{from{transform:scale(.4);opacity:0}40%{transform:scale(1.15);opacity:1}to{transform:scale(1);opacity:0}}
-
 .confetti-piece{position:absolute;width:10px;height:16px;border-radius:3px;z-index:90;pointer-events:none;animation:confettiFly 900ms ease-out forwards}
 @keyframes confettiFly{0%{transform:translate(0,0) rotate(0deg) scale(.8);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(1);opacity:0}}
-
 .final-toys{position:absolute;inset:0;z-index:80;display:none;pointer-events:auto;cursor:default}
 .final-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);padding:18px 34px;border-radius:26px;background:rgba(255,255,255,.95);color:#30245f;font-size:38px;font-weight:900;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.28);z-index:90}
 .toy-shelf{position:absolute;left:50%;bottom:68px;transform:translateX(-50%);width:78%;min-height:130px;display:flex;justify-content:center;align-items:flex-end;gap:28px;padding:16px 34px 22px;border-radius:28px 28px 12px 12px;background:linear-gradient(180deg,#f24e3f,#b51f1a);box-shadow:inset 0 8px 10px rgba(255,255,255,.25),inset 0 -10px 18px rgba(0,0,0,.25),0 14px 30px rgba(0,0,0,.28)}
 .toy{width:105px;height:105px;object-fit:contain;cursor:pointer;transition:transform .25s ease,opacity .25s ease;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
 .toy:hover{transform:translateY(-10px) scale(1.08)}
 .flying-toy{position:fixed;z-index:85;object-fit:contain;pointer-events:none;filter:drop-shadow(0 18px 22px rgba(0,0,0,.35));transition:all .75s cubic-bezier(.2,1.25,.3,1)}
-
 .overlay{position:absolute;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(8,7,30,.78);text-align:center}
 .modal{width:min(560px,90%);padding:34px;border-radius:32px;background:rgba(255,255,255,.96);color:#30245f;box-shadow:0 20px 60px rgba(0,0,0,.38)}
-.modal h2{margin:0 0 14px;font-size:38px}
-.modal p{margin:10px 0 24px;font-size:24px;font-weight:800}
-.prize{font-size:88px;margin-bottom:10px}
+.modal h2{margin:0 0 14px;font-size:38px}.modal p{margin:10px 0 24px;font-size:24px;font-weight:800}
 button{border:0;border-radius:18px;padding:14px 24px;font-size:22px;font-weight:900;color:#fff;background:linear-gradient(135deg,#7d5cff,#ff64c8);cursor:pointer}
 </style>
 </head>
-
 <body>
 <div id="game">
-  <div class="bg" id="bg"></div>
-  <div class="lives" id="lives"></div>
-  <div class="progress" id="progress">1 / 8</div>
+<div class="bg" id="bg"></div>
+<div class="lives" id="lives"></div>
+<div class="progress" id="progress">1 / 8</div>
+<div class="task-panel" id="taskPanel"><img id="taskImg" class="task-img"></div>
+<div id="balloons"></div>
+<div class="aim-line" id="aimLine"></div>
+<div class="gun" id="gun"><img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png"></div>
+<div class="aim" id="aim"><div class="aim-dot"></div></div>
+<audio id="popSound" preload="auto" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/41054ce590f7f7c28a17670a33f1eb307b445102/82121__gniffelbaf__balloon-burst-07.wav"></audio>
 
-  <div class="task-panel" id="taskPanel">
-    <img id="taskImg" class="task-img">
-  </div>
+<div class="final-toys" id="finalToys">
+<div class="final-title">Молодец! Выбери себе игрушку</div>
+<div class="toy-shelf">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/1.png">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/2.png">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/3.png">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/4.png">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/5.png">
+<img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/6.png">
+</div>
+</div>
 
-  <div id="balloons"></div>
-  <div class="aim-line" id="aimLine"></div>
-
-  <div class="gun" id="gun">
-    <img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png">
-  </div>
-
-  <div class="aim" id="aim"><div class="aim-dot"></div></div>
-
-  <audio id="popSound" preload="auto" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/41054ce590f7f7c28a17670a33f1eb307b445102/82121__gniffelbaf__balloon-burst-07.wav"></audio>
-
-  <div class="final-toys" id="finalToys">
-    <div class="final-title">Молодец! Выбери себе игрушку</div>
-    <div class="toy-shelf">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/1.png">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/2.png">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/3.png">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/4.png">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/5.png">
-      <img class="toy" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1649dee301bbff42f68d66af8ba7c4719b40eac4/img/6.png">
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay">
-    <div class="modal">
-      <div class="prize" id="prize">🧸</div>
-      <h2 id="finalTitle">Попробуй ещё раз!</h2>
-      <p id="finalText">Жизни закончились.</p>
-      <button id="restartBtn">Играть снова</button>
-    </div>
-  </div>
+<div class="overlay" id="overlay"><div class="modal"><h2 id="finalTitle">Попробуй ещё раз!</h2><p id="finalText">Жизни закончились.</p><button id="restartBtn">Играть снова</button></div></div>
 </div>
 
 <script>
+const USER_CONFIG = ${userConfigJSON};
+
 const GAME_CONFIG={
-  roundsTotal:8,livesTotal:3,balloonsCount:3,
-  balloonFlyTime:900,balloonStopY:34,popDelay:1000,
-  aimPaddingX:120,aimTopLimit:130,aimBottomLimit:520,gunMaxRotate:24,
+  roundsTotal:USER_CONFIG.roundsTotal||8,
+  livesTotal:3,
+  balloonsCount:3,
+  balloonFlyTime:900,
+  balloonStopY:34,
+  popDelay:1000,
+  aimPaddingX:120,
+  aimTopLimit:130,
+  aimBottomLimit:520,
+  gunMaxRotate:24,
   backgroundImage:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/60fe98cf0899a039719a76c82b8cdf4f39200511/image.png",
   heartFull:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/da4be476cd97dfdad9419b4c18c06be5400f9146/%D1%81%D0%B5%D1%80%D0%B4%D1%86%D0%B0/1.png",
   heartBroken:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/da4be476cd97dfdad9419b4c18c06be5400f9146/%D1%81%D0%B5%D1%80%D0%B4%D1%86%D0%B0/2.png",
-  prizeEmoji:"🧸",
   balloonSkins:[
     {normal:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/79fad425bc350cd79eadce245171d502dcbcc3cc/1.png",popped:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/57cbe8b0a7fb3666e49c03f834d00de005b8d8bb/2.png"},
     {normal:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/c50a2a79def20b60c0adad0344ad2dc85a607754/3.png",popped:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/fd73ba42175e7665c08b70f7d543176ba2905c0d/4.png"},
     {normal:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/1f1228a565db107b1403e486e1520bb4dca46387/5.png",popped:"https://raw.githubusercontent.com/propodgotovkaa-creator/tir/4f8ff4c8e85c70ec93e31d4b9b008ba7931beaac/6.png"}
   ],
-  tasks:[
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=собака",correctWord:"собака",words:["медуза","собака","сумка"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сова",correctWord:"сова",words:["сова","сыр","сок"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сок",correctWord:"сок",words:["сыр","сок","санки"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сумка",correctWord:"сумка",words:["сумка","сова","сыр"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сыр",correctWord:"сыр",words:["сок","сыр","собака"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=санки",correctWord:"санки",words:["сова","санки","сумка"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=самолёт",correctWord:"самолёт",words:["самолёт","сок","сумка"]},
-    {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сундук",correctWord:"сундук",words:["сыр","сундук","сова"]}
-  ]
+  tasks:USER_CONFIG.tasks||[]
 };
 
-const game=document.getElementById("game"),bg=document.getElementById("bg"),taskPanel=document.getElementById("taskPanel"),taskImg=document.getElementById("taskImg"),balloonsBox=document.getElementById("balloons"),livesBox=document.getElementById("lives"),progressBox=document.getElementById("progress"),overlay=document.getElementById("overlay"),finalTitle=document.getElementById("finalTitle"),finalText=document.getElementById("finalText"),prize=document.getElementById("prize"),restartBtn=document.getElementById("restartBtn"),aim=document.getElementById("aim"),aimLine=document.getElementById("aimLine"),gun=document.getElementById("gun"),popSound=document.getElementById("popSound"),finalToys=document.getElementById("finalToys");
+const game=document.getElementById("game"),bg=document.getElementById("bg"),taskPanel=document.getElementById("taskPanel"),taskImg=document.getElementById("taskImg"),balloonsBox=document.getElementById("balloons"),livesBox=document.getElementById("lives"),progressBox=document.getElementById("progress"),overlay=document.getElementById("overlay"),finalTitle=document.getElementById("finalTitle"),finalText=document.getElementById("finalText"),restartBtn=document.getElementById("restartBtn"),aim=document.getElementById("aim"),aimLine=document.getElementById("aimLine"),gun=document.getElementById("gun"),popSound=document.getElementById("popSound"),finalToys=document.getElementById("finalToys");
 
 let currentRound=0,lives=GAME_CONFIG.livesTotal,locked=false,aimX=window.innerWidth/2,aimY=window.innerHeight/2;
 
@@ -140,11 +265,7 @@ function preloadAssets(){
   popSound.load();
 }
 
-function playPopSound(){
-  const s=popSound.cloneNode(true);
-  s.volume=.9;
-  s.play().catch(()=>{});
-}
+function playPopSound(){const s=popSound.cloneNode(true);s.volume=.9;s.play().catch(()=>{})}
 
 function init(){
   currentRound=0;lives=GAME_CONFIG.livesTotal;locked=false;
@@ -155,8 +276,7 @@ function init(){
   gun.style.display="block";aim.style.display="block";aimLine.style.display="block";
   taskPanel.style.display="flex";livesBox.style.display="flex";progressBox.style.display="block";
   document.querySelectorAll(".toy").forEach(toy=>{toy.style.opacity="1";toy.style.visibility="visible"});
-  prize.textContent=GAME_CONFIG.prizeEmoji;
-  bg.style.backgroundImage=`url("${GAME_CONFIG.backgroundImage}")`;
+  bg.style.backgroundImage='url("'+GAME_CONFIG.backgroundImage+'")';
   renderLives();startRound();updateAim(aimX,aimY);
 }
 
@@ -166,7 +286,6 @@ function renderLives(){
     const heart=document.createElement("img");
     heart.className="heart";
     heart.src=i>=lives?GAME_CONFIG.heartBroken:GAME_CONFIG.heartFull;
-    heart.alt="";
     livesBox.appendChild(heart);
   }
 }
@@ -175,7 +294,7 @@ function startRound(){
   locked=false;balloonsBox.innerHTML="";
   const task=GAME_CONFIG.tasks[currentRound%GAME_CONFIG.tasks.length];
   taskImg.src=task.image;
-  progressBox.textContent=`${currentRound+1} / ${GAME_CONFIG.roundsTotal}`;
+  progressBox.textContent=(currentRound+1)+" / "+GAME_CONFIG.roundsTotal;
   createBalloons(task);
 }
 
@@ -183,29 +302,46 @@ function createBalloons(task){
   const words=[...task.words].sort(()=>Math.random()-.5).slice(0,GAME_CONFIG.balloonsCount);
   if(!words.includes(task.correctWord))words[0]=task.correctWord;
   const positions=[22,50,78];
+
   words.forEach((word,index)=>{
     const skin=GAME_CONFIG.balloonSkins[index];
     const balloon=document.createElement("div");
     balloon.className="balloon";
-    balloon.style.left=`calc(${positions[index]}% - 150px)`;
+    balloon.style.left="calc("+positions[index]+"% - 150px)";
     balloon.style.top=GAME_CONFIG.balloonStopY+"%";
     balloon.style.animationDuration=GAME_CONFIG.balloonFlyTime+"ms";
-    const img=document.createElement("img");img.src=skin.normal;
-    const label=document.createElement("div");label.className="balloon-word";label.textContent=word;
-    balloon.appendChild(label);balloon.appendChild(img);
-    balloon.addEventListener("click",e=>{e.stopPropagation();shoot(balloon,img,skin,word,task.correctWord,aimX,aimY)});
+
+    const img=document.createElement("img");
+    img.src=skin.normal;
+
+    const label=document.createElement("div");
+    label.className="balloon-word";
+    label.textContent=word;
+
+    balloon.appendChild(label);
+    balloon.appendChild(img);
+
+    balloon.addEventListener("click",e=>{
+      e.stopPropagation();
+      shoot(balloon,img,skin,word,task.correctWord,aimX,aimY);
+    });
+
     balloonsBox.appendChild(balloon);
   });
 }
 
 function popBalloon(balloon,img,skin){
-  balloon.dataset.popped="true";balloon.classList.add("popped");balloon.style.pointerEvents="none";
-  img.src=skin.popped;playPopSound();
+  balloon.dataset.popped="true";
+  balloon.classList.add("popped");
+  balloon.style.pointerEvents="none";
+  img.src=skin.popped;
+  playPopSound();
 }
 
 function showConfetti(){
   const colors=["#ff4d6d","#ffd93d","#6bff95","#4dabff","#b56bff","#ff9f1c"];
   const bursts=[{x:window.innerWidth*.18,y:window.innerHeight*.42},{x:window.innerWidth*.82,y:window.innerHeight*.42}];
+
   bursts.forEach(burst=>{
     for(let i=0;i<34;i++){
       const piece=document.createElement("div");
@@ -226,28 +362,44 @@ function showConfetti(){
 
 function shoot(balloon,img,skin,word,correctWord,x,y){
   if(locked||balloon.dataset.popped==="true")return;
-  popBalloon(balloon,img,skin);createShotFlash(x,y);
+  popBalloon(balloon,img,skin);
+  createShotFlash(x,y);
 
   if(word===correctWord){
     locked=true;
     showConfetti();
-    setTimeout(()=>{currentRound++;currentRound>=GAME_CONFIG.roundsTotal?winGame():startRound()},GAME_CONFIG.popDelay);
+    setTimeout(()=>{
+      currentRound++;
+      currentRound>=GAME_CONFIG.roundsTotal?winGame():startRound();
+    },GAME_CONFIG.popDelay);
   }else{
-    lives--;renderLives();showCross(x,y);
-    setTimeout(()=>{balloon.remove();if(lives<=0){locked=true;loseGame()}},GAME_CONFIG.popDelay);
+    lives--;
+    renderLives();
+    showCross(x,y);
+    setTimeout(()=>{
+      balloon.remove();
+      if(lives<=0){locked=true;loseGame()}
+    },GAME_CONFIG.popDelay);
   }
 }
 
 function createShotFlash(x,y){
   const flash=document.createElement("div");
-  flash.className="shot-flash";flash.style.left=x-19+"px";flash.style.top=y-19+"px";
-  game.appendChild(flash);setTimeout(()=>flash.remove(),200);
+  flash.className="shot-flash";
+  flash.style.left=x-19+"px";
+  flash.style.top=y-19+"px";
+  game.appendChild(flash);
+  setTimeout(()=>flash.remove(),200);
 }
 
 function showCross(x,y){
   const cross=document.createElement("div");
-  cross.className="cross";cross.textContent="✖";cross.style.left=x-34+"px";cross.style.top=y-50+"px";
-  game.appendChild(cross);setTimeout(()=>cross.remove(),650);
+  cross.className="cross";
+  cross.textContent="✖";
+  cross.style.left=x-34+"px";
+  cross.style.top=y-50+"px";
+  game.appendChild(cross);
+  setTimeout(()=>cross.remove(),650);
 }
 
 function winGame(){
@@ -294,15 +446,20 @@ function updateAim(rawX,rawY){
   const minX=GAME_CONFIG.aimPaddingX,maxX=window.innerWidth-GAME_CONFIG.aimPaddingX;
   const minY=GAME_CONFIG.aimTopLimit,maxY=Math.min(window.innerHeight-180,GAME_CONFIG.aimBottomLimit);
   aimX=clamp(rawX,minX,maxX);aimY=clamp(rawY,minY,maxY);
-  aim.style.left=aimX+"px";aim.style.top=aimY+"px";
+  aim.style.left=aimX+"px";
+  aim.style.top=aimY+"px";
 
   const startX=window.innerWidth/2,startY=window.innerHeight-52;
   const dx=aimX-startX,dy=aimY-startY;
   const length=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
-  aimLine.style.left=startX+"px";aimLine.style.top=startY+"px";aimLine.style.width=length+"px";aimLine.style.transform=`rotate(${angle}deg)`;
+
+  aimLine.style.left=startX+"px";
+  aimLine.style.top=startY+"px";
+  aimLine.style.width=length+"px";
+  aimLine.style.transform="rotate("+angle+"deg)";
 
   const gunAngle=clamp((aimX-startX)/(window.innerWidth/2)*GAME_CONFIG.gunMaxRotate,-GAME_CONFIG.gunMaxRotate,GAME_CONFIG.gunMaxRotate);
-  gun.style.transform=`translateX(-50%) rotate(${gunAngle}deg)`;
+  gun.style.transform="translateX(-50%) rotate("+gunAngle+"deg)";
 }
 
 document.addEventListener("mousemove",e=>updateAim(e.clientX,e.clientY));
@@ -311,6 +468,13 @@ restartBtn.addEventListener("click",init);
 
 preloadAssets();
 init();
+<\/script>
+</body>
+</html>`;
+}
+
+defaultRounds.forEach(r=>addRound(r));
+generateCode();
 </script>
 </body>
 </html>

@@ -364,8 +364,6 @@ const GAME_CONFIG = {
 
   prizeEmoji: "🧸",
 
-  wrongPoppedImage: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/2.png",
-
   balloonSkins: [
     {
       normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/83ef03cf4fc77b38e378a95c7f9c2079a93ea6d1/1.png",
@@ -538,11 +536,13 @@ function shoot(balloon, img, skin, word, correctWord, x, y) {
 
   createShotFlash(x, y);
 
+  balloon.dataset.popped = "true";
+  balloon.classList.add("popped");
+  img.src = skin.popped;
+  balloon.style.pointerEvents = "none";
+
   if (word === correctWord) {
     locked = true;
-    balloon.dataset.popped = "true";
-    balloon.classList.add("popped");
-    img.src = skin.popped;
 
     setTimeout(() => {
       currentRound++;
@@ -557,11 +557,6 @@ function shoot(balloon, img, skin, word, correctWord, x, y) {
   } else {
     lives--;
     renderLives();
-
-    balloon.dataset.popped = "true";
-    balloon.classList.add("popped");
-    img.src = GAME_CONFIG.wrongPoppedImage;
-    balloon.style.pointerEvents = "none";
 
     if (GAME_CONFIG.showFeedback) {
       showCross(x, y);

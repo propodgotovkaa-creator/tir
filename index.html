@@ -333,6 +333,8 @@ button {
     <div class="aim-dot"></div>
   </div>
 
+  <audio id="popSound" preload="auto" src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/41054ce590f7f7c28a17670a33f1eb307b445102/82121__gniffelbaf__balloon-burst-07.wav"></audio>
+
   <div class="overlay" id="overlay">
     <div class="modal">
       <div class="prize" id="prize">🧸</div>
@@ -382,38 +384,14 @@ const GAME_CONFIG = {
   ],
 
   tasks: [
-    {
-      correctWord: "собака",
-      words: ["медуза", "собака", "сумка"]
-    },
-    {
-      correctWord: "сова",
-      words: ["сова", "сыр", "сок"]
-    },
-    {
-      correctWord: "самолёт",
-      words: ["самолёт", "санки", "сундук"]
-    },
-    {
-      correctWord: "сыр",
-      words: ["сумка", "сыр", "самокат"]
-    },
-    {
-      correctWord: "сок",
-      words: ["сок", "соты", "сапоги"]
-    },
-    {
-      correctWord: "санки",
-      words: ["сова", "санки", "сумка"]
-    },
-    {
-      correctWord: "сумка",
-      words: ["сыр", "сумка", "сок"]
-    },
-    {
-      correctWord: "сундук",
-      words: ["самокат", "сундук", "сова"]
-    }
+    { correctWord: "собака", words: ["медуза", "собака", "сумка"] },
+    { correctWord: "сова", words: ["сова", "сыр", "сок"] },
+    { correctWord: "самолёт", words: ["самолёт", "санки", "сундук"] },
+    { correctWord: "сыр", words: ["сумка", "сыр", "самокат"] },
+    { correctWord: "сок", words: ["сок", "соты", "сапоги"] },
+    { correctWord: "санки", words: ["сова", "санки", "сумка"] },
+    { correctWord: "сумка", words: ["сыр", "сумка", "сок"] },
+    { correctWord: "сундук", words: ["самокат", "сундук", "сова"] }
   ]
 };
 
@@ -431,12 +409,33 @@ const restartBtn = document.getElementById("restartBtn");
 const aim = document.getElementById("aim");
 const aimLine = document.getElementById("aimLine");
 const gun = document.getElementById("gun");
+const popSound = document.getElementById("popSound");
 
 let currentRound = 0;
 let lives = GAME_CONFIG.livesTotal;
 let locked = false;
 let aimX = window.innerWidth / 2;
 let aimY = window.innerHeight / 2;
+
+function preloadAssets() {
+  const urls = [
+    GAME_CONFIG.backgroundImage,
+    ...GAME_CONFIG.balloonSkins.flatMap(skin => [skin.normal, skin.popped])
+  ];
+
+  urls.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+
+  popSound.load();
+}
+
+function playPopSound() {
+  const sound = popSound.cloneNode(true);
+  sound.volume = 0.85;
+  sound.play().catch(() => {});
+}
 
 function init() {
   currentRound = 0;
@@ -525,15 +524,19 @@ function getBalloonPositions(count) {
   return result;
 }
 
+function popBalloon(balloon, img, skin) {
+  balloon.dataset.popped = "true";
+  balloon.classList.add("popped");
+  balloon.style.pointerEvents = "none";
+  img.src = skin.popped;
+  playPopSound();
+}
+
 function shoot(balloon, img, skin, word, correctWord, x, y) {
   if (locked || balloon.dataset.popped === "true") return;
 
+  popBalloon(balloon, img, skin);
   createShotFlash(x, y);
-
-  balloon.dataset.popped = "true";
-  balloon.classList.add("popped");
-  img.src = skin.popped;
-  balloon.style.pointerEvents = "none";
 
   if (word === correctWord) {
     locked = true;
@@ -656,6 +659,7 @@ window.addEventListener("resize", () => {
 
 restartBtn.addEventListener("click", init);
 
+preloadAssets();
 init();
 </script>
 </body>

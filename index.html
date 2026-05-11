@@ -7,26 +7,23 @@
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:#f3f4fb;color:#222}
 .wrap{max-width:1100px;margin:0 auto;padding:24px}
-h1{margin:0 0 18px}
-.card{background:white;border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
-label{font-weight:700;display:block;margin:10px 0 6px}
-input,textarea,button{font-family:inherit}
-input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;font-size:15px}
+.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .round{border:2px solid #e6e6f0;border-radius:16px;padding:14px;margin:14px 0;background:#fafaff}
+label{font-weight:700;display:block;margin:10px 0 6px}
+input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;font-size:15px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 button{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:800;cursor:pointer}
-.primary{background:#6d5cff;color:white}
-.secondary{background:#e7e7f5;color:#30245f}
-.danger{background:#ffdddd;color:#a60000}
+.primary{background:#6d5cff;color:white}.secondary{background:#e7e7f5;color:#30245f}.danger{background:#ffdddd;color:#a60000}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 .output{height:220px}
-.preview-img{width:80px;height:80px;object-fit:contain;margin-top:8px;border:1px dashed #bbb;border-radius:10px;background:white}
+.preview-img{width:90px;height:90px;object-fit:contain;margin-top:8px;border:1px dashed #bbb;border-radius:10px;background:white}
 .small{font-size:13px;color:#666}
 </style>
 </head>
+
 <body>
 <div class="wrap">
-  <h1>Редактор игры «Тир: найди слово»</h1>
+  <h1>Редактор игры «Тир»</h1>
 
   <div class="card">
     <label>Количество раундов</label>
@@ -44,7 +41,7 @@ button{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:
 
   <div class="card">
     <h2>Готовый iframe-код</h2>
-    <p class="small">Скопируй этот код и вставь в Genially как embed/iframe. Потом растяни iframe на слайде.</p>
+    <p class="small">Скопируй код и вставь в Genially как embed/iframe. Потом растяни iframe на слайде.</p>
     <textarea id="output" class="output" readonly></textarea>
     <br><br>
     <button class="primary" onclick="copyCode()">Скопировать код</button>
@@ -60,8 +57,9 @@ const defaultRounds = [
   {image:"https://dummyimage.com/220x220/ffffff/30245f&text=сок", correctWord:"сок", words:["сыр","сок","санки"]}
 ];
 
-function addRound(data={}){
+function addRound(data = {}) {
   roundCounter++;
+
   const d = data.correctWord ? data : {
     image:"",
     correctWord:"",
@@ -70,15 +68,14 @@ function addRound(data={}){
 
   const box = document.createElement("div");
   box.className = "round";
-  box.dataset.id = roundCounter;
 
   box.innerHTML = `
     <h3>Раунд ${roundCounter}</h3>
 
     <label>Картинка задания</label>
     <input type="file" accept="image/*" onchange="loadImageFile(this)">
-    <input class="imageUrl" placeholder="или вставь ссылку на картинку" value="${d.image || ""}">
-    <img class="preview-img" src="${d.image || ""}" style="${d.image ? "" : "display:none"}">
+    <input class="imageUrl" placeholder="или вставь ссылку на картинку" value="${d.image || ""}" oninput="updatePreview(this)" onchange="updatePreview(this)">
+    <img class="preview-img" referrerpolicy="no-referrer" src="${d.image || ""}" style="${d.image ? "" : "display:none"}" onerror="this.style.display='none'">
 
     <label>Правильное слово</label>
     <input class="correctWord" placeholder="например: сок" value="${d.correctWord || ""}">
@@ -97,33 +94,51 @@ function addRound(data={}){
   document.getElementById("roundsBox").appendChild(box);
 }
 
-function loadImageFile(input){
+function updatePreview(input) {
+  const round = input.closest(".round");
+  const img = round.querySelector(".preview-img");
+  const url = input.value.trim();
+
+  if (!url) {
+    img.style.display = "none";
+    img.removeAttribute("src");
+    return;
+  }
+
+  img.style.display = "block";
+  img.referrerPolicy = "no-referrer";
+  img.src = url;
+}
+
+function loadImageFile(input) {
   const file = input.files[0];
-  if(!file)return;
+  if (!file) return;
 
   const reader = new FileReader();
   reader.onload = e => {
     const round = input.closest(".round");
-    round.querySelector(".imageUrl").value = e.target.result;
+    const urlInput = round.querySelector(".imageUrl");
     const img = round.querySelector(".preview-img");
+
+    urlInput.value = e.target.result;
     img.src = e.target.result;
     img.style.display = "block";
   };
   reader.readAsDataURL(file);
 }
 
-function collectConfig(){
-  const rounds = [...document.querySelectorAll(".round")].map(r=>{
+function collectConfig() {
+  const rounds = [...document.querySelectorAll(".round")].map(r => {
     const image = r.querySelector(".imageUrl").value.trim();
     const correctWord = r.querySelector(".correctWord").value.trim();
-    const words = [...r.querySelectorAll(".word")].map(i=>i.value.trim()).filter(Boolean);
+    const words = [...r.querySelectorAll(".word")].map(i => i.value.trim()).filter(Boolean);
 
     return {
       image: image || "https://dummyimage.com/220x220/ffffff/30245f&text=" + encodeURIComponent(correctWord || "?"),
       correctWord: correctWord || words[0] || "",
       words: words.length ? words : [correctWord,"",""]
     };
-  }).filter(r=>r.correctWord);
+  }).filter(r => r.correctWord);
 
   return {
     roundsTotal: Number(document.getElementById("roundsTotal").value) || rounds.length || 1,
@@ -131,7 +146,7 @@ function collectConfig(){
   };
 }
 
-function escapeAttr(str){
+function escapeAttr(str) {
   return str
     .replace(/&/g,"&amp;")
     .replace(/'/g,"&#39;")
@@ -140,20 +155,20 @@ function escapeAttr(str){
     .replace(/>/g,"&gt;");
 }
 
-function generateCode(){
+function generateCode() {
   const config = collectConfig();
   const gameHtml = buildGameHTML(config);
   const iframe = `<iframe style="width:100%;height:100%;border:0;position:absolute;top:0;left:0;" srcdoc='${escapeAttr(gameHtml)}'></iframe>`;
   document.getElementById("output").value = iframe;
 }
 
-function copyCode(){
+function copyCode() {
   const out = document.getElementById("output");
   out.select();
   document.execCommand("copy");
 }
 
-function buildGameHTML(userConfig){
+function buildGameHTML(userConfig) {
 const userConfigJSON = JSON.stringify(userConfig);
 
 return `<!doctype html>
@@ -167,24 +182,24 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans
 #game{position:relative;width:100vw;height:100vh;overflow:hidden;cursor:none;background:#0d1238}
 #game.final-mode{cursor:default}
 .bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0}
-.task-panel{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;background:transparent;box-shadow:none;padding:0}
+.task-panel{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;background:transparent;padding:0}
 .task-img{width:125px;height:125px;object-fit:contain;display:block}
 .lives{position:absolute;top:22px;left:22px;z-index:20;display:flex;flex-direction:column;gap:8px}
 .heart{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
-.progress{position:absolute;top:22px;right:22px;z-index:20;padding:10px 16px;border-radius:18px;background:rgba(255,255,255,.94);color:#30245f;font-size:22px;font-weight:900;box-shadow:0 10px 28px rgba(0,0,0,.26)}
+.progress{position:absolute;top:22px;right:22px;z-index:20;padding:10px 16px;border-radius:18px;background:rgba(255,255,255,.94);color:#30245f;font-size:22px;font-weight:900}
 .balloon{position:absolute;width:300px;height:340px;display:flex;justify-content:center;align-items:center;animation:flyUp .9s ease-out forwards;z-index:8}
 .balloon img{width:270px;height:270px;object-fit:contain;display:block;pointer-events:none}
-.balloon-word{position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:3;font-size:30px;font-weight:900;color:#fff;text-align:center;line-height:1.05;padding:6px 14px;border-radius:16px;background:rgba(30,20,80,.72);text-shadow:0 3px 6px rgba(0,0,0,.45);box-shadow:0 6px 16px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
+.balloon-word{position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:3;font-size:30px;font-weight:900;color:#fff;text-align:center;padding:6px 14px;border-radius:16px;background:rgba(30,20,80,.72);text-shadow:0 3px 6px rgba(0,0,0,.45);white-space:nowrap}
 .balloon.popped .balloon-word{display:none}
 @keyframes flyUp{from{transform:translateY(45vh) scale(.85);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .gun{position:absolute;left:50%;bottom:-18px;width:330px;z-index:40;pointer-events:none;transform-origin:50% 90%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45))}
 .gun img{width:100%;height:auto;display:block}
 .aim{position:absolute;width:62px;height:62px;border:3px solid rgba(255,255,255,.95);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:50;box-shadow:0 0 8px rgba(255,255,255,.9),0 0 20px rgba(79,214,255,.75),inset 0 0 12px rgba(79,214,255,.45)}
-.aim::before,.aim::after{content:"";position:absolute;background:rgba(255,255,255,.95);box-shadow:0 0 8px rgba(79,214,255,.9)}
+.aim::before,.aim::after{content:"";position:absolute;background:rgba(255,255,255,.95)}
 .aim::before{width:82px;height:2px;left:-13px;top:50%}
 .aim::after{width:2px;height:82px;left:50%;top:-13px}
-.aim-dot{position:absolute;width:8px;height:8px;left:50%;top:50%;border-radius:50%;background:#ff4747;transform:translate(-50%,-50%);box-shadow:0 0 10px #ff4747}
-.aim-line{position:absolute;height:3px;background:linear-gradient(90deg,rgba(79,214,255,.05),rgba(79,214,255,.75));transform-origin:left center;pointer-events:none;opacity:.65;z-index:35;box-shadow:0 0 12px rgba(79,214,255,.6)}
+.aim-dot{position:absolute;width:8px;height:8px;left:50%;top:50%;border-radius:50%;background:#ff4747;transform:translate(-50%,-50%)}
+.aim-line{position:absolute;height:3px;background:linear-gradient(90deg,rgba(79,214,255,.05),rgba(79,214,255,.75));transform-origin:left center;pointer-events:none;z-index:35}
 .shot-flash{position:absolute;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#ffe66d 40%,transparent 75%);animation:flash .18s ease-out forwards;pointer-events:none;z-index:55}
 @keyframes flash{from{transform:scale(.5);opacity:1}to{transform:scale(2.4);opacity:0}}
 .cross{position:absolute;z-index:70;font-size:72px;color:#ff3030;text-shadow:0 4px 16px rgba(0,0,0,.45);pointer-events:none;animation:crossAnim .65s ease-out forwards}
@@ -192,14 +207,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans
 .confetti-piece{position:absolute;width:10px;height:16px;border-radius:3px;z-index:90;pointer-events:none;animation:confettiFly 900ms ease-out forwards}
 @keyframes confettiFly{0%{transform:translate(0,0) rotate(0deg) scale(.8);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(1);opacity:0}}
 .final-toys{position:absolute;inset:0;z-index:80;display:none;pointer-events:auto;cursor:default}
-.final-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);padding:18px 34px;border-radius:26px;background:rgba(255,255,255,.95);color:#30245f;font-size:38px;font-weight:900;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.28);z-index:90}
-.toy-shelf{position:absolute;left:50%;bottom:68px;transform:translateX(-50%);width:78%;min-height:130px;display:flex;justify-content:center;align-items:flex-end;gap:28px;padding:16px 34px 22px;border-radius:28px 28px 12px 12px;background:linear-gradient(180deg,#f24e3f,#b51f1a);box-shadow:inset 0 8px 10px rgba(255,255,255,.25),inset 0 -10px 18px rgba(0,0,0,.25),0 14px 30px rgba(0,0,0,.28)}
-.toy{width:105px;height:105px;object-fit:contain;cursor:pointer;transition:transform .25s ease,opacity .25s ease;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
-.toy:hover{transform:translateY(-10px) scale(1.08)}
+.final-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);padding:18px 34px;border-radius:26px;background:rgba(255,255,255,.95);color:#30245f;font-size:38px;font-weight:900;text-align:center;z-index:90}
+.toy-shelf{position:absolute;left:50%;bottom:68px;transform:translateX(-50%);width:78%;min-height:130px;display:flex;justify-content:center;align-items:flex-end;gap:28px;padding:16px 34px 22px;border-radius:28px 28px 12px 12px;background:linear-gradient(180deg,#f24e3f,#b51f1a)}
+.toy{width:105px;height:105px;object-fit:contain;cursor:pointer}
 .flying-toy{position:fixed;z-index:85;object-fit:contain;pointer-events:none;filter:drop-shadow(0 18px 22px rgba(0,0,0,.35));transition:all .75s cubic-bezier(.2,1.25,.3,1)}
 .overlay{position:absolute;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(8,7,30,.78);text-align:center}
-.modal{width:min(560px,90%);padding:34px;border-radius:32px;background:rgba(255,255,255,.96);color:#30245f;box-shadow:0 20px 60px rgba(0,0,0,.38)}
-.modal h2{margin:0 0 14px;font-size:38px}.modal p{margin:10px 0 24px;font-size:24px;font-weight:800}
+.modal{width:min(560px,90%);padding:34px;border-radius:32px;background:rgba(255,255,255,.96);color:#30245f}
 button{border:0;border-radius:18px;padding:14px 24px;font-size:22px;font-weight:900;color:#fff;background:linear-gradient(135deg,#7d5cff,#ff64c8);cursor:pointer}
 </style>
 </head>
@@ -208,7 +221,7 @@ button{border:0;border-radius:18px;padding:14px 24px;font-size:22px;font-weight:
 <div class="bg" id="bg"></div>
 <div class="lives" id="lives"></div>
 <div class="progress" id="progress">1 / 8</div>
-<div class="task-panel" id="taskPanel"><img id="taskImg" class="task-img"></div>
+<div class="task-panel" id="taskPanel"><img id="taskImg" class="task-img" referrerpolicy="no-referrer"></div>
 <div id="balloons"></div>
 <div class="aim-line" id="aimLine"></div>
 <div class="gun" id="gun"><img src="https://raw.githubusercontent.com/propodgotovkaa-creator/tir/a545558fc45369ee5aaf1a39612022d58b87dd32/%D0%BF%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D0%B5%D1%8C%D1%82.png"></div>
@@ -261,7 +274,7 @@ let currentRound=0,lives=GAME_CONFIG.livesTotal,locked=false,aimX=window.innerWi
 
 function preloadAssets(){
   const urls=[GAME_CONFIG.backgroundImage,GAME_CONFIG.heartFull,GAME_CONFIG.heartBroken,...GAME_CONFIG.balloonSkins.flatMap(s=>[s.normal,s.popped]),...GAME_CONFIG.tasks.map(t=>t.image),...Array.from(document.querySelectorAll(".toy")).map(t=>t.src)];
-  urls.forEach(url=>{const img=new Image();img.src=url});
+  urls.forEach(url=>{const img=new Image();img.referrerPolicy="no-referrer";img.src=url});
   popSound.load();
 }
 
@@ -473,7 +486,7 @@ init();
 </html>`;
 }
 
-defaultRounds.forEach(r=>addRound(r));
+defaultRounds.forEach(r => addRound(r));
 generateCode();
 </script>
 </body>

@@ -43,25 +43,19 @@ html, body {
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 26px;
+  justify-content: center;
+  padding: 12px;
   border-radius: 24px;
   background: rgba(255,255,255,0.94);
   box-shadow: 0 10px 28px rgba(0,0,0,0.28);
 }
 
-.task-panel span {
-  font-size: 26px;
-  font-weight: 900;
-  color: #30245f;
-}
-
-.task-word {
-  font-size: 42px;
-  font-weight: 900;
-  color: #30245f;
-  line-height: 1;
-  text-transform: lowercase;
+.task-img {
+  width: 115px;
+  height: 115px;
+  object-fit: contain;
+  border-radius: 18px;
+  display: block;
 }
 
 .lives {
@@ -318,8 +312,7 @@ button {
   <div class="progress" id="progress">1 / 8</div>
 
   <div class="task-panel">
-    <span>Найди:</span>
-    <div id="taskWord" class="task-word"></div>
+    <img id="taskImg" class="task-img" alt="Задание">
   </div>
 
   <div id="balloons"></div>
@@ -384,20 +377,52 @@ const GAME_CONFIG = {
   ],
 
   tasks: [
-    { correctWord: "собака", words: ["медуза", "собака", "сумка"] },
-    { correctWord: "сова", words: ["сова", "сыр", "сок"] },
-    { correctWord: "самолёт", words: ["самолёт", "санки", "сундук"] },
-    { correctWord: "сыр", words: ["сумка", "сыр", "самокат"] },
-    { correctWord: "сок", words: ["сок", "соты", "сапоги"] },
-    { correctWord: "санки", words: ["сова", "санки", "сумка"] },
-    { correctWord: "сумка", words: ["сыр", "сумка", "сок"] },
-    { correctWord: "сундук", words: ["самокат", "сундук", "сова"] }
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=собака",
+      correctWord: "собака",
+      words: ["медуза", "собака", "сумка"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=сова",
+      correctWord: "сова",
+      words: ["сова", "сыр", "сок"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=самолёт",
+      correctWord: "самолёт",
+      words: ["самолёт", "санки", "сундук"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=сыр",
+      correctWord: "сыр",
+      words: ["сумка", "сыр", "самокат"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=сок",
+      correctWord: "сок",
+      words: ["сок", "соты", "сапоги"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=санки",
+      correctWord: "санки",
+      words: ["сова", "санки", "сумка"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=сумка",
+      correctWord: "сумка",
+      words: ["сыр", "сумка", "сок"]
+    },
+    {
+      image: "https://dummyimage.com/220x220/ffffff/30245f&text=сундук",
+      correctWord: "сундук",
+      words: ["самокат", "сундук", "сова"]
+    }
   ]
 };
 
 const game = document.getElementById("game");
 const bg = document.getElementById("bg");
-const taskWord = document.getElementById("taskWord");
+const taskImg = document.getElementById("taskImg");
 const balloonsBox = document.getElementById("balloons");
 const livesBox = document.getElementById("lives");
 const progressBox = document.getElementById("progress");
@@ -420,7 +445,8 @@ let aimY = window.innerHeight / 2;
 function preloadAssets() {
   const urls = [
     GAME_CONFIG.backgroundImage,
-    ...GAME_CONFIG.balloonSkins.flatMap(skin => [skin.normal, skin.popped])
+    ...GAME_CONFIG.balloonSkins.flatMap(skin => [skin.normal, skin.popped]),
+    ...GAME_CONFIG.tasks.map(task => task.image)
   ];
 
   urls.forEach(url => {
@@ -468,7 +494,7 @@ function startRound() {
 
   const task = GAME_CONFIG.tasks[currentRound % GAME_CONFIG.tasks.length];
 
-  taskWord.textContent = task.correctWord;
+  taskImg.src = task.image;
   progressBox.textContent = `${currentRound + 1} / ${GAME_CONFIG.roundsTotal}`;
 
   createBalloons(task);

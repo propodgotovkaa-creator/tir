@@ -364,20 +364,20 @@ const GAME_CONFIG = {
 
   prizeEmoji: "🧸",
 
-  wrongPoppedImage: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/1.png",
+  wrongPoppedImage: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/2.png",
 
   balloonSkins: [
     {
       normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/83ef03cf4fc77b38e378a95c7f9c2079a93ea6d1/1.png",
-      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/1.png"
+      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/0f83b8c973764c348e295d9432e3cf7e31804160/2.png"
     },
     {
-      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/36415665c0e2cbacb29068ef2a8c9e54c5ba24d1/1.png",
-      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/4158021f97731c2001fee8056568ba917a9090fc/1.png"
+      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/36415665c0e2cbacb29068ef2a8c9e54c5ba24d1/3.png",
+      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/4158021f97731c2001fee8056568ba917a9090fc/4.png"
     },
     {
-      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/c9a2b0ea64213d610aa22eb2e266888a524781bf/1.png",
-      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/88e3741bb8759326e3f0e75e4f07b4f297a8a6a2/1.png"
+      normal: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/c9a2b0ea64213d610aa22eb2e266888a524781bf/5.png",
+      popped: "https://raw.githubusercontent.com/propodgotovkaa-creator/tir/88e3741bb8759326e3f0e75e4f07b4f297a8a6a2/6.png"
     }
   ],
 
@@ -534,13 +534,13 @@ function getBalloonPositions(count) {
 }
 
 function shoot(balloon, img, skin, word, correctWord, x, y) {
-  if (locked) return;
+  if (locked || balloon.dataset.popped === "true") return;
 
   createShotFlash(x, y);
 
   if (word === correctWord) {
     locked = true;
-
+    balloon.dataset.popped = "true";
     balloon.classList.add("popped");
     img.src = skin.popped;
 
@@ -558,6 +558,7 @@ function shoot(balloon, img, skin, word, correctWord, x, y) {
     lives--;
     renderLives();
 
+    balloon.dataset.popped = "true";
     balloon.classList.add("popped");
     img.src = GAME_CONFIG.wrongPoppedImage;
     balloon.style.pointerEvents = "none";

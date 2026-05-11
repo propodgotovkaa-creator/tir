@@ -9,6 +9,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#0d1238}
 #game{position:relative;width:100vw;height:100vh;overflow:hidden;cursor:none;background:#0d1238}
+#game.final-mode{cursor:default}
 .bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0}
 
 .task-panel{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;padding:12px;border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 10px 28px rgba(0,0,0,.28)}
@@ -24,7 +25,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans
 .balloon img{width:270px;height:270px;object-fit:contain;display:block;pointer-events:none}
 .balloon-word{position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:3;font-size:30px;font-weight:900;color:#fff;text-align:center;line-height:1.05;padding:6px 14px;border-radius:16px;background:rgba(30,20,80,.72);text-shadow:0 3px 6px rgba(0,0,0,.45);box-shadow:0 6px 16px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
 .balloon.popped .balloon-word{display:none}
-
 @keyframes flyUp{from{transform:translateY(45vh) scale(.85);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 
 .gun{position:absolute;left:50%;bottom:-18px;width:330px;z-index:40;pointer-events:none;transform-origin:50% 90%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45))}
@@ -43,13 +43,21 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans
 .cross{position:absolute;z-index:70;font-size:72px;color:#ff3030;text-shadow:0 4px 16px rgba(0,0,0,.45);pointer-events:none;animation:crossAnim .65s ease-out forwards}
 @keyframes crossAnim{from{transform:scale(.4);opacity:0}40%{transform:scale(1.15);opacity:1}to{transform:scale(1);opacity:0}}
 
-.final-toys{position:absolute;inset:0;z-index:80;display:none;pointer-events:auto}
-.final-title{position:absolute;top:22%;left:50%;transform:translateX(-50%);padding:18px 34px;border-radius:26px;background:rgba(255,255,255,.95);color:#30245f;font-size:38px;font-weight:900;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.confetti-side{position:absolute;top:36%;z-index:90;font-size:58px;pointer-events:none;animation:confettiPop 1s ease-out forwards}
+.confetti-left{left:8%}
+.confetti-right{right:8%}
+@keyframes confettiPop{
+  0%{transform:scale(.4) translateY(20px);opacity:0}
+  25%{transform:scale(1.25) translateY(-10px);opacity:1}
+  100%{transform:scale(1) translateY(-70px);opacity:0}
+}
+
+.final-toys{position:absolute;inset:0;z-index:80;display:none;pointer-events:auto;cursor:default}
+.final-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);padding:18px 34px;border-radius:26px;background:rgba(255,255,255,.95);color:#30245f;font-size:38px;font-weight:900;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.28);z-index:90}
 .toy-shelf{position:absolute;left:50%;bottom:68px;transform:translateX(-50%);width:78%;min-height:130px;display:flex;justify-content:center;align-items:flex-end;gap:28px;padding:16px 34px 22px;border-radius:28px 28px 12px 12px;background:linear-gradient(180deg,#f24e3f,#b51f1a);box-shadow:inset 0 8px 10px rgba(255,255,255,.25),inset 0 -10px 18px rgba(0,0,0,.25),0 14px 30px rgba(0,0,0,.28)}
 .toy{width:105px;height:105px;object-fit:contain;cursor:pointer;transition:transform .25s ease,opacity .25s ease;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
 .toy:hover{transform:translateY(-10px) scale(1.08)}
-
-.flying-toy{position:fixed;z-index:300;object-fit:contain;pointer-events:none;filter:drop-shadow(0 18px 22px rgba(0,0,0,.35));transition:all .75s cubic-bezier(.2,1.25,.3,1)}
+.flying-toy{position:fixed;z-index:85;object-fit:contain;pointer-events:none;filter:drop-shadow(0 18px 22px rgba(0,0,0,.35));transition:all .75s cubic-bezier(.2,1.25,.3,1)}
 
 .overlay{position:absolute;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(8,7,30,.78);text-align:center}
 .modal{width:min(560px,90%);padding:34px;border-radius:32px;background:rgba(255,255,255,.96);color:#30245f;box-shadow:0 20px 60px rgba(0,0,0,.38)}
@@ -145,9 +153,10 @@ function playPopSound(){
 
 function init(){
   currentRound=0;lives=GAME_CONFIG.livesTotal;locked=false;
+  game.classList.remove("final-mode");
   overlay.style.display="none";finalToys.style.display="none";
   balloonsBox.innerHTML="";
-  document.querySelectorAll(".flying-toy").forEach(t=>t.remove());
+  document.querySelectorAll(".flying-toy,.confetti-side").forEach(t=>t.remove());
   gun.style.display="block";aim.style.display="block";aimLine.style.display="block";
   taskPanel.style.display="flex";livesBox.style.display="flex";progressBox.style.display="block";
   document.querySelectorAll(".toy").forEach(toy=>{toy.style.opacity="1";toy.style.visibility="visible"});
@@ -198,11 +207,25 @@ function popBalloon(balloon,img,skin){
   img.src=skin.popped;playPopSound();
 }
 
+function showConfetti(){
+  const left=document.createElement("div");
+  left.className="confetti-side confetti-left";
+  left.textContent="🎉";
+  const right=document.createElement("div");
+  right.className="confetti-side confetti-right";
+  right.textContent="🎉";
+  game.appendChild(left);
+  game.appendChild(right);
+  setTimeout(()=>{left.remove();right.remove()},1000);
+}
+
 function shoot(balloon,img,skin,word,correctWord,x,y){
   if(locked||balloon.dataset.popped==="true")return;
   popBalloon(balloon,img,skin);createShotFlash(x,y);
+
   if(word===correctWord){
     locked=true;
+    showConfetti();
     setTimeout(()=>{currentRound++;currentRound>=GAME_CONFIG.roundsTotal?winGame():startRound()},GAME_CONFIG.popDelay);
   }else{
     lives--;renderLives();showCross(x,y);
@@ -223,7 +246,9 @@ function showCross(x,y){
 }
 
 function winGame(){
+  game.classList.add("final-mode");
   balloonsBox.innerHTML="";
+  document.querySelectorAll(".confetti-side").forEach(t=>t.remove());
   gun.style.display="none";aim.style.display="none";aimLine.style.display="none";
   taskPanel.style.display="none";livesBox.style.display="none";progressBox.style.display="none";
   finalToys.style.display="block";
@@ -246,10 +271,10 @@ function winGame(){
 
       requestAnimationFrame(()=>{
         clone.style.left="50%";
-        clone.style.top="48%";
-        clone.style.width="260px";
-        clone.style.height="260px";
-        clone.style.transform="translate(-50%,-50%) scale(1.15)";
+        clone.style.top="58%";
+        clone.style.width="250px";
+        clone.style.height="250px";
+        clone.style.transform="translate(-50%,-50%) scale(1.1)";
       });
     };
   });

@@ -483,13 +483,13 @@ function addRound(data = {}) {
     <img class="preview-img" referrerpolicy="no-referrer" src="${d.image || ""}" style="${d.image ? "" : "display:none"}" onerror="this.style.display='none'">
 
     <label>Правильное слово</label>
-    <input class="correctWord" placeholder="например: сок" value="${d.correctWord || ""}">
+    <input class="correctWord" placeholder="например: сок" value="${d.correctWord || ""}" oninput="document.getElementById('output').value=''">
 
     <label>Слова на шариках</label>
     <div class="grid">
-      <input class="word" placeholder="слово 1" value="${d.words?.[0] || ""}">
-      <input class="word" placeholder="слово 2" value="${d.words?.[1] || ""}">
-      <input class="word" placeholder="слово 3" value="${d.words?.[2] || ""}">
+      <input class="word" placeholder="слово 1" value="${d.words?.[0] || ""}" oninput="document.getElementById('output').value=''">
+      <input class="word" placeholder="слово 2" value="${d.words?.[1] || ""}" oninput="document.getElementById('output').value=''">
+      <input class="word" placeholder="слово 3" value="${d.words?.[2] || ""}" oninput="document.getElementById('output').value=''">
     </div>
 
     <br>
@@ -503,10 +503,12 @@ function addRound(data = {}) {
 function syncRoundsTotal() {
   const count = document.querySelectorAll(".round").length;
   const input = document.getElementById("roundsTotal");
-  if (Number(input.value) < count) input.value = count;
+  input.value = count;
+  document.getElementById("output").value = "";
 }
 
 function updatePreview(input) {
+  document.getElementById("output").value = "";
   const round = input.closest(".round");
   const img = round.querySelector(".preview-img");
   const url = input.value.trim();
@@ -523,6 +525,7 @@ function updatePreview(input) {
 }
 
 function loadImageFile(input) {
+  document.getElementById("output").value = "";
   const file = input.files[0];
   if (!file) return;
 
@@ -572,6 +575,7 @@ function escapeAttr(str) {
 
 function generateCode() {
   try {
+    syncRoundsTotal();
     const config = collectConfig();
     let gameHtml = document.getElementById("gameTemplate").innerHTML;
     gameHtml = gameHtml.replace("__USER_CONFIG__", JSON.stringify(config));
@@ -586,11 +590,8 @@ function generateCode() {
 }
 
 function copyCode() {
+  generateCode();
   const out = document.getElementById("output");
-
-  if (!out.value.trim()) {
-    generateCode();
-  }
 
   navigator.clipboard.writeText(out.value).then(() => {
     alert("Код скопирован!");

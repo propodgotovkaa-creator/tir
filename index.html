@@ -58,7 +58,7 @@ button{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#0d1238}
-#game{position:relative;width:100vw;height:100vh;overflow:hidden;cursor:none;background:#0d1238}
+#game{position:relative;width:100vw;height:100vh;overflow:hidden;cursor:crosshair;background:#0d1238}
 #game.final-mode{cursor:default}
 .bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0}
 .task-panel{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;background:transparent;padding:0}
@@ -243,6 +243,12 @@ function renderLives(){
 function startRound(){
   locked=false;
   balloonsBox.innerHTML="";
+
+  if(!GAME_CONFIG.tasks.length){
+    loseGame();
+    return;
+  }
+
   const task=GAME_CONFIG.tasks[currentRound%GAME_CONFIG.tasks.length];
   taskImg.src=task.image;
   progressBox.textContent=(currentRound+1)+" / "+GAME_CONFIG.roundsTotal;
@@ -436,6 +442,8 @@ function updateAim(rawX,rawY){
 }
 
 document.addEventListener("mousemove",e=>updateAim(e.clientX,e.clientY));
+document.addEventListener("pointermove",e=>updateAim(e.clientX,e.clientY));
+game.addEventListener("pointermove",e=>updateAim(e.clientX,e.clientY));
 window.addEventListener("resize",()=>updateAim(aimX,aimY));
 restartBtn.addEventListener("click",init);
 
@@ -485,10 +493,17 @@ function addRound(data = {}) {
     </div>
 
     <br>
-    <button class="danger" onclick="this.closest('.round').remove()">Удалить раунд</button>
+    <button class="danger" onclick="this.closest('.round').remove(); syncRoundsTotal();">Удалить раунд</button>
   `;
 
   document.getElementById("roundsBox").appendChild(box);
+  syncRoundsTotal();
+}
+
+function syncRoundsTotal() {
+  const count = document.querySelectorAll(".round").length;
+  const input = document.getElementById("roundsTotal");
+  if (Number(input.value) < count) input.value = count;
 }
 
 function updatePreview(input) {
@@ -537,8 +552,11 @@ function collectConfig() {
     };
   }).filter(r => r.correctWord);
 
+  const manualTotal = Number(document.getElementById("roundsTotal").value) || 0;
+  const realTotal = rounds.length || defaultRounds.length || 1;
+
   return {
-    roundsTotal: Number(document.getElementById("roundsTotal").value) || rounds.length || 1,
+    roundsTotal: Math.max(manualTotal, realTotal),
     tasks: rounds.length ? rounds : defaultRounds
   };
 }
